@@ -9,10 +9,12 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { useSession } from '../../providers/auth-provider';
 
 const SignUpView = () => {
     const router = useRouter();
-
+    const { status } = useSession();
     const form = useForm({
         resolver: zodResolver(signUpDto),
         defaultValues: {
@@ -34,6 +36,12 @@ const SignUpView = () => {
 
         router.push("/auth/sign-in");
     }
+
+    useEffect(() => {
+        if (status === "authenticated") {
+            router.push("/dashboard")
+        }
+    }, [status, router])
 
   return (
     <Card className='max-w-xl mx-auto w-full'>

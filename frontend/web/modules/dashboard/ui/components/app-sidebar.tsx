@@ -1,10 +1,10 @@
 "use server";
 
-import {Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem} from "./ui/sidebar";
+import {Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem} from "../../../../components/ui/sidebar";
 import SidebarMenuItems from "./sidebar-menu-items";
 import { Credits } from "./credits";
 
-export function AppSidebar() {
+export async function AppSidebar() {
     return (
         <Sidebar>
             <SidebarContent>

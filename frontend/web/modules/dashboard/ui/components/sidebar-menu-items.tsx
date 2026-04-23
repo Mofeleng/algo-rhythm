@@ -2,7 +2,7 @@
 
 import { Home, Music, Search } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar";
+import { SidebarMenuButton, SidebarMenuItem } from "../../../../components/ui/sidebar";
 
 export default function SidebarMenuItems() {
     const path = usePathname();
@@ -10,23 +10,17 @@ export default function SidebarMenuItems() {
     
     let sidebarItems = [
         {
-            title: "Home",
-            url: "/",
+            title: "Dashboard",
+            url: "/dashboard",
             icon: Home,
             active: false
         },
         {
             title: "Create",
-            url: "/create",
+            url: "/dashboard/create",
             icon: Music,
             active: false
         },
-        {
-            title: "Search",
-            url: "/search",
-            icon: Search,
-            active: false
-        }
     ];
 
     sidebarItems = sidebarItems.map((item) => ({
