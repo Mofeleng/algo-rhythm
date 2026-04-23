@@ -1,0 +1,5 @@
+.venv
+__pycache__
+ACE-Step
+models/__pycache__
+models/dtos/__pycache__

@@ -1,0 +1,9 @@
+pydantic
+boto3
+numpy
+torchaudio
+soundfile
+diffusers
+transformers
+torch          
+accelerate
