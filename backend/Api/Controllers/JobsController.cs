@@ -25,14 +25,18 @@ namespace Api.Controllers
         [HttpPost]
 
         [Route("generate-song")]
-        public ActionResult GenerateSong()
+        [Authorize]
+        public ActionResult GenerateSong([FromBody] GenerateSongClientRequest request)
         {
             var song = new Song
             {
-                UserId = Guid.Parse("17dde162-873d-4a27-919e-fe6f2bd1a273"),
-                Prompt = "Write a song about how much more difficult building an AI music generator saas has been",
-                LyricsDescription = "Fast paced fun song about starting companies",
-                Title = "Please work!!"
+                UserId = Guid.Parse(request.UserId),
+                Prompt = request.Prompt ?? "",
+                LyricsDescription = request.LyricsDescription ?? "",
+                SongDescription = request.SongDescription ?? "",
+                Instrumental = request.Instrumental ?? false,
+                Title = request.Title,
+                GuidanceScale = request.GuidanceScale
             };
 
             var newSong = _songRepository.Create(song);
@@ -40,13 +44,13 @@ namespace Api.Controllers
 
             GenerateSongDto songProps = new GenerateSongDto
             {
-                UserId = Guid.Parse("17dde162-873d-4a27-919e-fe6f2bd1a273"),
+                UserId = Guid.Parse(request.UserId),
                 SongId = newSong.Id
 
             };
 
             var determineUrlJobId = BackgroundJob.Enqueue(() => _songService.GenerateSong(songProps));
-            return Ok(new { message = "Generating song", jobId = determineUrlJobId });
+            return Ok(new { message = "Generating song..." });
         }
     }
 }

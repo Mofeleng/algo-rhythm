@@ -19,16 +19,13 @@ namespace Api.Services
 
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, userId.ToString())
+                new Claim(ClaimTypes.NameIdentifier, userId.ToString())
             };
 
-            var securityToken = new JwtSecurityToken(
-                issuer: null,
-                audience: null,
-                claims: claims,
-                expires: DateTime.UtcNow.AddDays(1),
-                signingCredentials: credentials
-            );
+            var header = new JwtHeader(credentials);
+            var payload = new JwtPayload(null, null, claims, null, DateTime.Today.AddDays(1));
+
+            var securityToken = new JwtSecurityToken(header, payload);
          
             return new JwtSecurityTokenHandler().WriteToken(securityToken);
         }
