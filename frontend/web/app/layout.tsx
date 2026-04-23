@@ -5,10 +5,11 @@ import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/modules/dashboard/ui/components/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList } from "@/components/ui/breadcrumb";
-import { BreadcrumbPageClient } from "@/components/breadcrumb-page-client";
+import { BreadcrumbPageClient } from "@/modules/dashboard/ui/components/breadcrumb-page-client";
+import { AuthProvider } from "@/modules/auth/providers/auth-provider";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
@@ -38,29 +39,11 @@ export default function RootLayout({
       className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable)}
     >
       <body className="min-h-full flex flex-col">
-      <SidebarProvider>
-          <AppSidebar />
-          <SidebarInset className="flex h-screen flex-col">
-            <header className="bg-background sticky-top z-10 border-b px-4 py-2">
-              <div className="flex shrink-0 grow items-center gap-2">
-                <SidebarTrigger className="ml-1"/>
-                <Separator orientation="vertical" className="mr-2" />
-                <Breadcrumb>
-                  <BreadcrumbList>
-                    <BreadcrumbItem>
-                      <BreadcrumbPageClient />
-                    </BreadcrumbItem>
-                  </BreadcrumbList>
-                </Breadcrumb>
-              </div>
-            </header>
-            <main className="flex-1 overflow-y-auto">
-              <TooltipProvider>
-                {children}
-              </TooltipProvider>
-            </main>
-          </SidebarInset>
-        </SidebarProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            {children}
+          </TooltipProvider>
+        </AuthProvider>
         <Toaster />
       </body>
     </html>
