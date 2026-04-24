@@ -3,6 +3,8 @@ using Api.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Api.Models;
 using Api.Services;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Api.Controllers
 {
@@ -55,23 +57,20 @@ namespace Api.Controllers
             return Ok(new { message = "Success" });
         }
 
-        [HttpGet("user")]
+        [HttpGet("me")]
+        [Authorize]
         public IActionResult GetUser()
         {
-            try
-            {
-                var jwt = Request.Cookies["jwt"];
-                if (jwt is null) return Unauthorized(new { message = "Unauthorized" });
-                var token = _jwtService.Verify(jwt);
-                Guid userId = Guid.Parse(token.Subject);
-                var user = _userRepository.GetById(userId);
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return Unauthorized();
+            var user = _userRepository.GetById(Guid.Parse(userIdClaim));
 
-                if (user is null) return NotFound(new { message = "User not found" });
-                return Ok(new { user });
-            } catch
+            if (user is null) return NotFound();
+
+            return Ok(new
             {
-                return Unauthorized();
-            }
+                user = new { user.Id, user.Name, user.Email }
+            });
         }
 
         [HttpPost("logout")]
