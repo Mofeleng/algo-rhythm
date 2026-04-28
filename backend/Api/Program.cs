@@ -1,4 +1,5 @@
 using Api.Data;
+using Api.Hubs;
 using Api.Repositories;
 using Api.Services;
 using Hangfire;
@@ -39,6 +40,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     };
 });
 
+builder.Services.AddHttpClient("ModalClient", client =>
+{
+    client.Timeout = TimeSpan.FromMinutes(5);
+});
+
 builder.Services.AddHangfire(configuration =>
     configuration.
     SetDataCompatibilityLevel(CompatibilityLevel.Version_180).
@@ -58,6 +64,7 @@ builder.Services.AddScoped<ISongRepository, SongRepository>();
 
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddSignalR();
 builder.Services.AddScoped<SongService>();
 
 var app = builder.Build();
@@ -69,6 +76,8 @@ if (app.Environment.IsDevelopment())
     app.UseHangfireDashboard("/hangfire");
     
 }
+
+app.MapHub<SongHub>("/song-hub");
 
 app.UseHttpsRedirection();
 

@@ -6,6 +6,7 @@ namespace Api.Repositories
     {
         Song? GetById(Guid songId);
         Song Create(Song song);
+        Task<List<Song>?> GetByUserId(Guid userId);
         void SaveChanges();
     }
 }

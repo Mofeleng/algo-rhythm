@@ -4,9 +4,7 @@ using Api.Repositories;
 using Api.Services;
 using Hangfire;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace Api.Controllers
 {
@@ -22,8 +20,8 @@ namespace Api.Controllers
             _songService = songService;
             _songRepository = songRepository;
         }
-        [HttpPost]
 
+        [HttpPost]
         [Route("generate-song")]
         [Authorize]
         public ActionResult GenerateSong([FromBody] GenerateSongClientRequest request)

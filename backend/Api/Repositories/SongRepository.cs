@@ -1,5 +1,7 @@
-﻿using Api.Data;
+﻿using Api.Controllers;
+using Api.Data;
 using Api.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Api.Repositories
 {
@@ -22,6 +24,13 @@ namespace Api.Repositories
         public Song? GetById(Guid songId)
         {
             return _context.Songs.FirstOrDefault(s => s.Id == songId);
+        }
+
+        public async Task<List<Song>?> GetByUserId(Guid userId)
+        {
+            var songs = await _context.Songs.Where(s => s.UserId == userId).OrderByDescending(s => s.CreatedAt).ToListAsync();
+
+            return songs;
         }
 
         public void SaveChanges()

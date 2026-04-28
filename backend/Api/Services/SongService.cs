@@ -1,7 +1,12 @@
-﻿using Api.Dtos;
+﻿using Amazon.S3;
+using Amazon.S3.Model;
+using Api.Dtos;
+using Api.Hubs;
 using Api.Models;
 using Api.Repositories;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.SignalR;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -13,12 +18,16 @@ namespace Api.Services
         private readonly ISongRepository _songRepository;
         private readonly IConfiguration _configuration;
         private readonly IHttpClientFactory _clientFactory;
-        public SongService(IUserRepository userRepository, IHttpClientFactory clientFactory, ISongRepository songRepository, IConfiguration configuration)
+        private readonly IHubContext<SongHub> _hubContext;
+
+        public SongService(IUserRepository userRepository, IHttpClientFactory clientFactory, ISongRepository songRepository, IConfiguration configuration, IHubContext<SongHub> hubContext)
         {
             _userRepository = userRepository;
             _songRepository = songRepository;
             _configuration = configuration;
             _clientFactory = clientFactory;
+            _hubContext = hubContext;
+            
         }
         public async Task<GenerateSongBackgroundResponse?> DetermineGenerationEndpoint(GenerateSongDto generateSong)
         {
@@ -100,12 +109,13 @@ namespace Api.Services
 
             if (request.Credits > 0)
             {
-                song.Status = "Processing";
+                song.Status = "processing";
                 _songRepository.SaveChanges();
+                await NotifyUser(generateSong.UserId, song.Status, song.Id, song.S3Key, song.ThumbnailS3Key);
 
                 if (string.IsNullOrEmpty(request.Endpoint)) return null; //Todo: More detailed error
 
-                var client = _clientFactory.CreateClient();
+                var client = _clientFactory.CreateClient("ModalClient");
 
                 var options = new JsonSerializerOptions
                 {
@@ -122,7 +132,7 @@ namespace Api.Services
 
                     if (result is null) return null;
                     song.S3Key = result.r2_key;
-                    song.Status = "Completed";
+                    song.Status = "completed";
                     song.ThumbnailS3Key = result.cover_image_r2;
 
                     if (result.categories != null)
@@ -137,23 +147,57 @@ namespace Api.Services
 
                     _songRepository.SaveChanges();
                     _userRepository.SaveChanges();
+                    await NotifyUser(generateSong.UserId, song.Status, song.Id, song.S3Key, song.ThumbnailS3Key);
 
                     return result;
                 } 
                 var errorJson = await response.Content.ReadAsStringAsync();
                 Console.WriteLine($"MODAL ERROR: {errorJson}"); // THIS WILL TELL YOU THE EXACT FIELD
 
-                song.Status = "Failed";
+                song.Status = "failed";
                 _songRepository.SaveChanges();
+                await NotifyUser(generateSong.UserId, song.Status, song.Id, song.S3Key, song.ThumbnailS3Key);
+
                 return null;
 
             }
             else
             {
-                song.Status = "No credits";
+                song.Status = "no credits";
                 _songRepository.SaveChanges();
+                await NotifyUser(generateSong.UserId, song.Status, song.Id, song.S3Key, song.ThumbnailS3Key);
+
                 return null;
             }
+       }
+
+        public async Task NotifyUser(Guid userId, string status, Guid songId, string? songUrl, string? thumbnailUrl)
+        {
+            await _hubContext.Clients.Group(userId.ToString()).SendAsync("RecieveSongUpdate", new
+            {
+                songId = songId.ToString(),
+                status = status,
+                songUrl = songUrl,
+                thumbnailUrl = thumbnailUrl
+            });
+        }
+
+        public string GeneratePresignedUrl(
+            IAmazonS3 r2Client,
+            string bucketName,
+            string r2Key
+        )
+        {
+            var request = new GetPreSignedUrlRequest
+            {
+                BucketName = bucketName,
+                Key = r2Key,
+                Expires = DateTime.UtcNow.AddHours(2)
+            };
+
+            string presignedUrl = r2Client.GetPreSignedURL(request);
+
+            return presignedUrl;
         }
     }
 }
