@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useSession } from "@/modules/auth/providers/auth-provider";
 import { useRouter } from "next/navigation";
 import { generateSong } from "../../actions/generate-song";
+import { PageLoading } from "@/components/page-loading";
 
 const inspirationTags = [
     "Driving rock anthem",
@@ -116,143 +117,138 @@ export function SongPanel() {
         }
     }, [status, router]);
 
-    if (status === "loading") {
-        return (
-            <div className="w-full h-full flex flex-col justify-center">
-                <div className="flex flex-col gap-1 items-center">
-                    <Loader className="animate-spin" />
-                    <span className="text-sm text-muted-foreground">Loading</span>
-                </div>
-            </div>
-        )
-    }
+
     return (
     <div className="bg-muted/30 flex w-full flex-col border-r lg:w-80">
-        <div className="flex-1 overflow-y-auto p-4">
-            <Tabs value={mode} onValueChange={(value) => setMode(value as "simple" | "custom")}>
-                <TabsList className="w-full">
-                    <TabsTrigger value="simple">Simple</TabsTrigger>
-                    <TabsTrigger value="custom">Custom</TabsTrigger>
-                </TabsList>
-                <TabsContent value="simple" className="mt-6 space-y-6">
-                    <div className="flex flex-col gap-3">
-                        <label className="text-sm font-medium">Describe the song</label>
-                        <Textarea
-                            value={songDescription}
-                            onChange={(e) => { setSongDescription(e.target.value) }}
-                            className="resize-none min-h-30" 
-                            placeholder="A 432Hz classic instrumental beat for studying"
-                        />
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <Button variant="outline" size="sm" onClick={() => setMode("custom")}><Plus className="mr-1" />Lyrics</Button>
-                        <div className="flex items-center gap-2">
-                            <label className="text-sm font-medium">Instrimental</label>
-                            <Switch checked={instrumental} onCheckedChange={(c) => setInstrumental(c)}/>
+        {     status === "loading" ? <PageLoading /> : (
+            <>
+            <div className="flex-1 overflow-y-auto p-4">
+                <Tabs value={mode} onValueChange={(value) => setMode(value as "simple" | "custom")}>
+                    <TabsList className="w-full">
+                        <TabsTrigger value="simple">Simple</TabsTrigger>
+                        <TabsTrigger value="custom">Custom</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="simple" className="mt-6 space-y-6">
+                        <div className="flex flex-col gap-3">
+                            <label className="text-sm font-medium">Describe the song</label>
+                            <Textarea
+                                value={songDescription}
+                                onChange={(e) => { setSongDescription(e.target.value) }}
+                                className="resize-none min-h-30" 
+                                placeholder="A 432Hz classic instrumental beat for studying"
+                            />
                         </div>
-                    </div>
-                    <div className="flex flex-col gap-3">
-                        <label className="text-sm font-medium">Inspiration</label>
-                        <div className="w-full overflow-x-auto whitespace-nowrap">
-                            <div className="flex gap-2 pb-2">
-                                { inspirationTags.map((i) => (
+                        <div className="flex items-center justify-between">
+                            <Button variant="outline" size="sm" onClick={() => setMode("custom")}><Plus className="mr-1" />Lyrics</Button>
+                            <div className="flex items-center gap-2">
+                                <label className="text-sm font-medium">Instrimental</label>
+                                <Switch checked={instrumental} onCheckedChange={(c) => setInstrumental(c)}/>
+                            </div>
+                        </div>
+                        <div className="flex flex-col gap-3">
+                            <label className="text-sm font-medium">Inspiration</label>
+                            <div className="w-full overflow-x-auto whitespace-nowrap">
+                                <div className="flex gap-2 pb-2">
+                                    { inspirationTags.map((i) => (
+                                        <Button
+                                            key={i}
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-7 shrink-0 bg-transparent text-xs"
+                                            onClick={() => handlePopulateInspiration(i)}
+                                        >
+                                            <Plus className="mr-1"/> { i}
+                                        </Button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </TabsContent>
+                    <TabsContent value="custom" className="mt-6 space-y-6">
+                        <div className="flex flex-col gap-3">
+                            <div className="flex items-center justify-between">
+                                <label className="text-sm font-medium">Lyrics</label>
+                                <div className="flex items-center gap-1">
                                     <Button
-                                        key={i}
-                                        variant="outline"
-                                        size="sm"
-                                        className="h-7 shrink-0 bg-transparent text-xs"
-                                        onClick={() => handlePopulateInspiration(i)}
+                                        className="h-7 text-sm"
+                                        onClick={() => {
+                                            setLyricsMode("auto");
+                                            setSongLyrics("")
+                                        }}
+                                        variant={lyricsMode === "auto" ? "secondary" : "ghost"}
                                     >
-                                        <Plus className="mr-1"/> { i}
+                                        Auto
                                     </Button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </TabsContent>
-                <TabsContent value="custom" className="mt-6 space-y-6">
-                    <div className="flex flex-col gap-3">
-                        <div className="flex items-center justify-between">
-                            <label className="text-sm font-medium">Lyrics</label>
-                            <div className="flex items-center gap-1">
-                                <Button
-                                    className="h-7 text-sm"
-                                    onClick={() => {
-                                        setLyricsMode("auto");
-                                        setSongLyrics("")
-                                    }}
-                                    variant={lyricsMode === "auto" ? "secondary" : "ghost"}
-                                >
-                                    Auto
-                                </Button>
 
-                                 <Button
-                                    className="h-7 text-sm"
-                                    onClick={() => {
-                                        setLyricsMode("default");
-                                        setSongLyrics("")
-                                    }}
-                                    variant={lyricsMode === "default" ? "secondary" : "ghost"}
-                                >
-                                    Default
-                                </Button>
-                            </div>
-                        </div>
-                        <Textarea 
-                            value={songLyrics}
-                            onChange={(e) => setSongLyrics(e.target.value)}
-                            className="min-h-25 resize-none"
-                            placeholder={lyricsMode === "default" ? "Write your lyrics here": "Describe the lyrics you would like generated"}
-                        />
-                        <div className="flex items-center justify-between">
-                            <label className="text-sm font-medium">Instrumental</label>
-                            <Switch checked={instrumental} onCheckedChange={(c) => setInstrumental(c)}/>
-                        </div>
-                    </div>
-                    
-                    <div className="flex flex-col gap-3">
-                        <label className="text-sm font-medium">Styles</label>
-                         <Textarea 
-                            value={songStyles}
-                            onChange={(e) => setSongStyles(e.target.value)}
-                            className="min-h-15 resize-none"
-                            placeholder="Enter song styles"
-                        />
-                        <div className="w-full overflow-x-auto whitespace-nowrap">
-                            <div className="flex gap-2 pb-2">
-                                { styleTags.map((i) => (
-                                    <Badge
-                                        key={i}
-                                        variant="secondary"
-                                        className="h-7 shrink-0 bg-secondary/80 flex cursor-pointer text-xs"
-                                        onClick={() => handlePopulateStyleTags(i)}
+                                    <Button
+                                        className="h-7 text-sm"
+                                        onClick={() => {
+                                            setLyricsMode("default");
+                                            setSongLyrics("")
+                                        }}
+                                        variant={lyricsMode === "default" ? "secondary" : "ghost"}
                                     >
-                                        <Plus className="mr-1"/> { i}
-                                    </Badge>
-                                ))}
+                                        Default
+                                    </Button>
+                                </div>
+                            </div>
+                            <Textarea 
+                                value={songLyrics}
+                                onChange={(e) => setSongLyrics(e.target.value)}
+                                className="min-h-25 resize-none"
+                                placeholder={lyricsMode === "default" ? "Write your lyrics here": "Describe the lyrics you would like generated"}
+                            />
+                            <div className="flex items-center justify-between">
+                                <label className="text-sm font-medium">Instrumental</label>
+                                <Switch checked={instrumental} onCheckedChange={(c) => setInstrumental(c)}/>
                             </div>
                         </div>
-                    </div>
-                </TabsContent>
-            </Tabs>
-        </div>
-        <div className="border-t p-4">
-            <Button
-                disabled={generating}
-                onClick={handleCreate}
-                className="w-full cursor-pointer bg-linear-to-r from-green-300 to-blue-300 hover:bg-linear-to-r hover:from-green-500 hover:to-blue-500 transition-all delay-100"
-            >
-                { generating ? (
-                    <>
-                        <Loader2 className="animate-spin"/> Generating
-                    </>
-                ): (
-                    <>
-                        <Music /> Generate
-                    </>
-                )}
-            </Button>
-        </div>
+                        
+                        <div className="flex flex-col gap-3">
+                            <label className="text-sm font-medium">Styles</label>
+                            <Textarea 
+                                value={songStyles}
+                                onChange={(e) => setSongStyles(e.target.value)}
+                                className="min-h-15 resize-none"
+                                placeholder="Enter song styles"
+                            />
+                            <div className="w-full overflow-x-auto whitespace-nowrap">
+                                <div className="flex gap-2 pb-2">
+                                    { styleTags.map((i) => (
+                                        <Badge
+                                            key={i}
+                                            variant="secondary"
+                                            className="h-7 shrink-0 bg-secondary/80 flex cursor-pointer text-xs"
+                                            onClick={() => handlePopulateStyleTags(i)}
+                                        >
+                                            <Plus className="mr-1"/> { i}
+                                        </Badge>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </TabsContent>
+                </Tabs>
+            </div>
+            <div className="border-t p-4">
+                <Button
+                    disabled={generating}
+                    onClick={handleCreate}
+                    className="w-full cursor-pointer bg-linear-to-r from-green-300 to-blue-300 hover:bg-linear-to-r hover:from-green-500 hover:to-blue-500 transition-all delay-100"
+                >
+                    { generating ? (
+                        <>
+                            <Loader2 className="animate-spin"/> Generating
+                        </>
+                    ): (
+                        <>
+                            <Music /> Generate
+                        </>
+                    )}
+                </Button>
+            </div>
+        </>
+        )}
     </div>
     )
 }

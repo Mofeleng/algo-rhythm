@@ -1,12 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { User } from "../dtos/user-dto";
 
-interface User {
-    id: string;
-    name: string;
-    email: string;
-}
 
 interface AuthContextType {
     user: User | null;
