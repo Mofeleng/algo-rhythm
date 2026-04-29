@@ -4,55 +4,47 @@ import { useSession } from "@/modules/auth/providers/auth-provider"
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { fetchTrackList } from "../../actions/fetch-track-list";
-import { Song } from "../../dtos/song-dto";
-import { toast } from "sonner";
 import { useSongUpdates } from "../../hooks/use-song-updates";
 import { SongList } from "../components/song-list";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { PageLoading } from "@/components/page-loading";
 
 export default function SongListView () {
     const router = useRouter();
     const { status, user } = useSession();
     const songUpdates = useSongUpdates(user?.id);
+    const queryClient = useQueryClient();
 
-    const [ songs, setSongs ] = useState<Song[]>([]);
-    
     useEffect(() => {
         if (status === "unauthenticated") {
             router.push("/auth/sign-in");
         }
     }, [status, router]);
 
-    useEffect(() => {
-        const useFetchTracks = async () => {
-            await fetchTrackList().then((data) => {
-                if (!data.ok) {
-                    toast.error(data.message ?? "");
-                    return;
-                }
-                console.log(data.body)
-                setSongs(data.body);
-            });
-        }
-
-     useFetchTracks();
-
-    }, []);
+    const { data:songs, isPending, error } = useQuery({
+        queryKey: ["get-songs"],
+        queryFn: fetchTrackList,
+    });
 
     useEffect(() => {
         if (songUpdates) {
-            toast("New song update");
-
-            if (songUpdates.status === "completed") {
-                setSongs((prev) => (
-                    prev.map((song) => 
-                        song.id === songUpdates.songId
-                        ? { ...song, status: songUpdates.status }
-                        : song
-                    )
-                ));
-            }
+            queryClient.invalidateQueries({ queryKey: ["get-songs"]});            
         }
-    }, [songUpdates])
+    }, [songUpdates]);
+
+    if (isPending) {
+        return (
+            <PageLoading />
+        )
+    }
+
+    if (error) {
+        return (
+            <div className="w-full h-full flex flex-col justify-center">
+                Error
+            </div>
+        )
+    }
     return (
         <>
             { songs.length > 0 ? (
