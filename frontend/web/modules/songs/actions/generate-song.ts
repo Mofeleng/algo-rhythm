@@ -3,7 +3,6 @@ import { GenerateRequest, GenerateResponse } from "../dtos/generate-song";
 
 
 export async function generateSong(generateRequest: GenerateRequest) {
-    console.log(generateRequest);
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API}/api/jobs/generate-song`, {
         method: "POST",
         headers: {
@@ -14,6 +13,5 @@ export async function generateSong(generateRequest: GenerateRequest) {
     });
 
    const data = await response.json();
-    console.log(data);
    return data as GenerateResponse;
 }

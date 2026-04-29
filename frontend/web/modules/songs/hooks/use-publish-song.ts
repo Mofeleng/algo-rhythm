@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { setPublishedStatus } from "../actions/set-published-status"
 
-export const usePublishSong = () => {
+export function usePublishSong() {
     const queryClient = useQueryClient();
 
     return useMutation({

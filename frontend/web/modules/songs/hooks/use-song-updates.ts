@@ -8,7 +8,7 @@ interface SongUpdate {
     thumbnailUrl: string | null;
 }
 
-export const useSongUpdates = (userId: string | undefined | null) => {
+export function useSongUpdates(userId: string | undefined | null) {
     const [ connection, setConnection ] = useState<signalR.HubConnection | null>(null);
     const [ latestUpdate , setLatestUpdate] = useState<SongUpdate|null>(null);
 

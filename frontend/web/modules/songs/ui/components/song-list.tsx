@@ -1,4 +1,4 @@
-import { Download, Loader, MoreHorizontal, Music, Play, RefreshCcw, Search, XCircle } from "lucide-react";
+import { Download, DownloadIcon, Loader, MoreHorizontal, Music, PencilIcon, Play, RefreshCcw, Search, Trash, XCircle } from "lucide-react";
 import { Song } from "../../dtos/song-dto";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
@@ -8,14 +8,26 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { usePublishSong } from "../../hooks/use-publish-song";
-import { useGeneratePlayUrl } from "../../hooks/use-play-url";
 import { generatePlayUrl } from "../../actions/generate-play-url";
+import { useQueryClient } from "@tanstack/react-query";
+import { DeleteSongAlert } from "./delete-song-alert";
+import { RenameSongModal } from "./rename-song-modal";
 
 export function SongList({ songs }: { songs: Song[] } ) {
     const [ searchQuery, setSearchQuery ] = useState<string>("");
     const [ isRefreshing, setIsRefreshing ] = useState<boolean>(false);
     const [ isLoadingSongId, setIsLoadingSongId ] = useState<string|null>(null);
+
+    const [ isDeleteOpen, setIsDeleteOpen ] = useState<boolean>(false);
+    const [ isRenameOpen, setIsRenameOpen ] = useState<boolean>(false);
+
+    const [ selectedId, setSelectedId ] = useState<string|undefined>();
+    const [prevName, setPrevName ] = useState<string|undefined>();
+
+
     const { mutate:handleSetPublishSong } = usePublishSong();
+
+    const queryClient = useQueryClient();
 
     const handleSelectSong = async (song: Song) => {
         setIsLoadingSongId(song.id)
@@ -27,7 +39,42 @@ export function SongList({ songs }: { songs: Song[] } ) {
         song.prompt?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    const handleRefresh = async () => {
+        setIsRefreshing(true);
+        await queryClient.invalidateQueries({ queryKey: ["get-songs" ]});    
+        setIsRefreshing(false);
+    }
+
+    const handleToggleRename = (songId: string, prevName: string) => {
+        setSelectedId(songId);
+        setPrevName(prevName);
+
+        setIsRenameOpen(true);
+    }
+
+    const handleToggleDelete = (songId: string) => {
+        setSelectedId(songId);
+        setIsDeleteOpen(true);
+    }
+
     return (
+        <>
+        {selectedId && (
+            <>
+            <DeleteSongAlert
+                open={isDeleteOpen}
+                setOpen={setIsDeleteOpen}
+                songId={selectedId}
+            />
+
+            <RenameSongModal
+                open={isRenameOpen}
+                setOpen={setIsRenameOpen}
+                songId={selectedId}
+                prevName={prevName ?? ""}
+            />
+            </>
+        )}
         <div className="flex flex-1 flex-col overflow-y-auto">
             <div className="flex-1 p-6">
                 <div className="mb-4 flex items-center justify-between gap-4">
@@ -43,9 +90,9 @@ export function SongList({ songs }: { songs: Song[] } ) {
                         size="sm"
                         variant="outline"
                         disabled={isRefreshing}
-                        onClick={() => {}}
+                        onClick={handleRefresh}
                     >
-                        { isRefreshing ? <Loader className="mr-2 animate-spin" /> : <RefreshCcw className="mr-2" />}
+                        <RefreshCcw className={cn("mr-2", isRefreshing && "animate-spin")} />
                         Refresh
                     </Button>
                 </div>
@@ -173,8 +220,30 @@ export function SongList({ songs }: { songs: Song[] } ) {
                                                                 return;
                                                              }} 
                                                             >
-                                                                <Download />
+                                                                <DownloadIcon />
                                                                 Download
+                                                            </DropdownMenuItem>
+
+                                                             <DropdownMenuItem
+                                                                className="mr-1"
+                                                                onClick={async (e) => {
+                                                                    e.stopPropagation();
+                                                                    handleToggleRename(song.id, song.title)
+                                                                }} 
+                                                            >
+                                                                <PencilIcon />
+                                                                Rename
+                                                            </DropdownMenuItem>
+
+                                                            <DropdownMenuItem
+                                                                className="mr-1"
+                                                                onClick={async (e) => {
+                                                                    e.stopPropagation();
+                                                                    handleToggleDelete(song.id)
+                                                                }} 
+                                                            >
+                                                                <Trash />
+                                                                Delete
                                                             </DropdownMenuItem>
                                                         </DropdownMenuContent>
                                                     </DropdownMenu>
@@ -187,5 +256,6 @@ export function SongList({ songs }: { songs: Song[] } ) {
                 </div>
             </div>
         </div>
+    </>
     )
 }
