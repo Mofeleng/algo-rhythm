@@ -12,6 +12,8 @@ import { generatePlayUrl } from "../../actions/generate-play-url";
 import { useQueryClient } from "@tanstack/react-query";
 import { DeleteSongAlert } from "./delete-song-alert";
 import { RenameSongModal } from "./rename-song-modal";
+import { usePlayerStore } from "../../stores/use-player-store";
+import { useSession } from "@/modules/auth/providers/auth-provider";
 
 export function SongList({ songs }: { songs: Song[] } ) {
     const [ searchQuery, setSearchQuery ] = useState<string>("");
@@ -24,14 +26,24 @@ export function SongList({ songs }: { songs: Song[] } ) {
     const [ selectedId, setSelectedId ] = useState<string|undefined>();
     const [prevName, setPrevName ] = useState<string|undefined>();
 
-
+    const { setSong } = usePlayerStore();
+    const { user } = useSession();
     const { mutate:handleSetPublishSong } = usePublishSong();
 
     const queryClient = useQueryClient();
 
     const handleSelectSong = async (song: Song) => {
         setIsLoadingSongId(song.id)
-        await generatePlayUrl(song.id);
+        const playUrl = await generatePlayUrl(song.id);
+        if (!playUrl.songUrl) return;
+
+        setSong({
+            id: song.id,
+            title: song.title,
+            playUrl: playUrl.songUrl,
+            createdByUserName: user?.name ?? "",
+            thumbnailUrl: song.thumbnailUrl ?? ""
+        });
     }
 
     const filteredSongs = songs.filter((song) => 
