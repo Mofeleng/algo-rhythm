@@ -1,12 +1,10 @@
-﻿using Amazon;
-using Amazon.S3;
-using Amazon.S3.Model;
+﻿using Amazon.S3;
 using Api.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using Api.Models;
 using Api.Services;
+using Api.Dtos;
 
 namespace Api.Controllers
 {
@@ -68,19 +66,17 @@ namespace Api.Controllers
         [HttpPost]
         [Route("generate-play-url")]
         [Authorize]
-        public IActionResult GeneratePlayUrl(string songId)
+        public IActionResult GeneratePlayUrl([FromBody] SongIdRequestDto request)
         {
-            var song = _songRepository.GetById(Guid.Parse(songId));
+            var song = _songRepository.GetById(Guid.Parse(request.songId));
             if (song is null) return NotFound(new { message = "Cannot generate a play url for a non existant song" });
-
-            Console.WriteLine("Hey" + songId + "Presigning..");
 
             if (string.IsNullOrEmpty(song.S3Key))
             {
                 return BadRequest(new { message = "Cannot generate play url for non existant song" });
             }
             string accessId = _configuration.GetValue<string>("Cloudflare:AccessKeyId")!;
-            string secretKey = _configuration.GetValue<string>("Cloudflare:SecurityAccessKey")!;
+            string secretKey = _configuration.GetValue<string>("Cloudflare:SecretAccessKey")!;
             string bucketName = _configuration.GetValue<string>("Cloudflare:BucketName")!;
 
             var config = new AmazonS3Config
@@ -104,9 +100,9 @@ namespace Api.Controllers
         [HttpPost]
         [Route("set-published-status")]
         [Authorize]
-        public IActionResult SetPublishedStatus(string songId)
+        public IActionResult SetPublishedStatus([FromBody] SongIdRequestDto request)
         {
-            var song = _songRepository.GetById(Guid.Parse(songId));
+            var song = _songRepository.GetById(Guid.Parse(request.songId));
             if (song is null) return NotFound(new { message = "Song does not exist" });
 
             song.Published = !song.Published;

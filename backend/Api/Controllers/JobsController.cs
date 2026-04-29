@@ -26,6 +26,7 @@ namespace Api.Controllers
         [Authorize]
         public ActionResult GenerateSong([FromBody] GenerateSongClientRequest request)
         {
+            
             var song = new Song
             {
                 UserId = Guid.Parse(request.UserId),
@@ -33,6 +34,7 @@ namespace Api.Controllers
                 LyricsDescription = request.LyricsDescription ?? "",
                 SongDescription = request.SongDescription ?? "",
                 Instrumental = request.Instrumental ?? false,
+                Status = "qeued",
                 Title = request.Title,
                 GuidanceScale = request.GuidanceScale
             };
