@@ -10,6 +10,8 @@ import { Separator } from "@/components/ui/separator";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList } from "@/components/ui/breadcrumb";
 import { BreadcrumbPageClient } from "@/modules/dashboard/ui/components/breadcrumb-page-client";
 import { AuthProvider } from "@/modules/auth/providers/auth-provider";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { TanstackQueryClientProvider } from "@/lib/query-client-provider";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
@@ -39,11 +41,13 @@ export default function RootLayout({
       className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable)}
     >
       <body className="min-h-full flex flex-col">
-        <AuthProvider>
-          <TooltipProvider>
-            {children}
-          </TooltipProvider>
-        </AuthProvider>
+        <TanstackQueryClientProvider>
+          <AuthProvider>
+            <TooltipProvider>
+              {children}
+            </TooltipProvider>
+          </AuthProvider>
+        </TanstackQueryClientProvider>
         <Toaster />
       </body>
     </html>

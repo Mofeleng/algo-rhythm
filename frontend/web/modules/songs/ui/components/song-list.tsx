@@ -3,49 +3,29 @@ import { Song } from "../../dtos/song-dto";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { generatePlayUrl } from "../../actions/generate-play-url";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { setPublishedStatus } from "../../actions/set-published-status";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { usePublishSong } from "../../hooks/use-publish-song";
+import { useGeneratePlayUrl } from "../../hooks/use-play-url";
+import { generatePlayUrl } from "../../actions/generate-play-url";
 
 export function SongList({ songs }: { songs: Song[] } ) {
     const [ searchQuery, setSearchQuery ] = useState<string>("");
     const [ isRefreshing, setIsRefreshing ] = useState<boolean>(false);
     const [ isLoadingSongId, setIsLoadingSongId ] = useState<string|null>(null);
-    const [ isPublishingSongId, setIsPublishingSongId ] = useState<string|null>(null);
+    const { mutate:handleSetPublishSong } = usePublishSong();
 
     const handleSelectSong = async (song: Song) => {
-        setIsLoadingSongId(song.id);
-
-        const playUrl = await generatePlayUrl(song.id);
-        if (!playUrl.ok) {
-            toast.error(playUrl.message);
-            return;
-        }
-
-        setIsLoadingSongId(null);
-        toast(playUrl.songUrl);
+        setIsLoadingSongId(song.id)
+        await generatePlayUrl(song.id);
     }
 
     const filteredSongs = songs.filter((song) => 
         song.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         song.prompt?.toLowerCase().includes(searchQuery.toLowerCase())
     );
-    
-    const handleSetPublishSong = async (songId: string) => {
-        setIsPublishingSongId(songId);
-        const updatePublished = await setPublishedStatus(songId);
-        if (!updatePublished.ok) {
-            setIsPublishingSongId(null);
-            toast(updatePublished.message);
-            return;
-        }
-
-        toast(updatePublished.message);
-        //Update in real time
-    }
 
     return (
         <div className="flex flex-1 flex-col overflow-y-auto">
@@ -106,13 +86,13 @@ export function SongList({ songs }: { songs: Song[] } ) {
                             case "processing":
                                 return (
                                     <div key={song.id} className="flex cursor-not-allowed items-center gap-4 rounded-lg p-3">
-                                        <div className="bg-destructive/10 flex h-12 w-12 shrink-0 items-center justify-center rounded-md">
+                                        <div className="bg-muted/30 flex h-12 w-12 shrink-0 items-center justify-center rounded-md">
                                             <Loader className="text-muted-foreground animate-spin h-6 w-6" />
                                         </div>
                                         <div className="min-w-0 flex-1">
-                                            <h3 className="text-muted-foreground truncate text-sm font-medium">Failed</h3>
+                                            <h3 className="text-muted-foreground truncate text-sm font-medium">Processing</h3>
                                             <p className="text-muted-foreground text-xs">
-                                                Please try creating the song again
+                                                Generating song, it will show up here once completed
                                             </p>
                                         </div>
                                     </div>
@@ -157,6 +137,7 @@ export function SongList({ songs }: { songs: Song[] } ) {
                                             </div>
                                             <div className="flex items-center gap-2">
                                                 <Button
+                                                    onClick={() => (handleSetPublishSong(song.id))}
                                                     variant="outline"
                                                     className={cn(
                                                         "cursor-pointer",
@@ -182,15 +163,13 @@ export function SongList({ songs }: { songs: Song[] } ) {
                                                              className="mr-1"
                                                              onClick={async (e) => {
                                                                 e.stopPropagation();
+                                                                console.log(song.id)
                                                                 const playUrl = await generatePlayUrl(song.id);
 
-                                                                if (playUrl.ok) {
+                                                                if (playUrl && playUrl.songUrl) {
                                                                     toast("at: " + playUrl.songUrl)
                                                                     window.open(playUrl.songUrl, "_blank");
                                                                 }
-
-                                                                toast(playUrl.message);
-                                                                toast(playUrl.songUrl)
                                                                 return;
                                                              }} 
                                                             >

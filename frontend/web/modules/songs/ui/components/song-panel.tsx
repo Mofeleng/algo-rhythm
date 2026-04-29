@@ -10,8 +10,8 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useSession } from "@/modules/auth/providers/auth-provider";
 import { useRouter } from "next/navigation";
-import { generateSong } from "../../actions/generate-song";
 import { PageLoading } from "@/components/page-loading";
+import { useGenerateSong } from "../../hooks/use-generate-song";
 
 const inspirationTags = [
     "Driving rock anthem",
@@ -34,12 +34,12 @@ const styleTags = [
 export function SongPanel() {
     const router = useRouter();
     const { status, user } = useSession();
+    const { mutateAsync:generateSong, isPending:generating } = useGenerateSong();
 
     const [ mode, setMode ] = useState<"simple"|"custom">("simple");
     
     const [ songDescription, setSongDescription ] = useState<string>("");
     const [ instrumental, setInstrumental ] = useState<boolean>(false);
-    const [ generating, setGenerating ] = useState<boolean>(false);
     const [ lyricsMode, setLyricsMode ] = useState<"auto"|"default">("default");
     const [ songLyrics, setSongLyrics ] = useState<string>("");
     const [ songStyles, setSongStyles ] = useState<string>("");
@@ -64,26 +64,21 @@ export function SongPanel() {
             toast.error("Please sign in before generating a song");
             return;
         };
-
-        setGenerating(true);
         const title = `audio-`.concat((Math.random() * 10000).toString());
-        
-        const generate = await generateSong({
+        const request = {
             Title: title,
             UserId: user.id,
             Prompt: songStyles,
             Lyrics: lyricsMode === "default" ? songLyrics : undefined,
             SongDescription: songDescription,
             LyricsDescription: lyricsMode === "auto" ? songLyrics : undefined,
-        });
-
-        if (!generate.ok) {
-            toast.error(generate.message);
-        } else {
-            toast.success(generate.message);
-            setGenerating(false);
-            resetForm();
         }
+
+        console.log(request);
+        await generateSong(request);
+
+        resetForm();
+
     } 
     const handlePopulateInspiration = (tag: string) => {
         const currentTags = songDescription.split(", ").map((s) =>

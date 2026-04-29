@@ -11,8 +11,5 @@ export async function setPublishedStatus(songId: string) {
 
     const result = await response.json() as { message: string; };
 
-    return {
-        ok: response.ok,
-        message: result.message
-    }
+    return result;
 }
