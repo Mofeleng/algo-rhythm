@@ -3,6 +3,7 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/s
 import { AppSidebar } from "@/modules/dashboard/ui/components/app-sidebar";
 import { BreadcrumbPageClient } from "@/modules/dashboard/ui/components/breadcrumb-page-client";
 import { Separator } from "@/components/ui/separator";
+import { SoundBar } from "@/modules/songs/ui/components/sound-bar";
 
 export default function Layout({ children }: { children: React.ReactNode}) {
     return (
@@ -25,6 +26,7 @@ export default function Layout({ children }: { children: React.ReactNode}) {
               <main className="flex-1">
                 { children }
               </main>
+              <SoundBar />
             </SidebarInset>
           </SidebarProvider>
     )
