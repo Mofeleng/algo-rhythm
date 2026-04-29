@@ -21,6 +21,14 @@ namespace Api.Repositories
             return song;
         }
 
+        public Song Delete(Song song)
+        {
+            _context.Remove(song);
+            _context.SaveChanges();
+
+            return song;
+        }
+
         public Song? GetById(Guid songId)
         {
             return _context.Songs.FirstOrDefault(s => s.Id == songId);

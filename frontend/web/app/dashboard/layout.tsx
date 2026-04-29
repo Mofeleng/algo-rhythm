@@ -8,7 +8,7 @@ export default function Layout({ children }: { children: React.ReactNode}) {
     return (
         <SidebarProvider>
             <AppSidebar />
-            <SidebarInset className="flex h-screen flex-col">
+            <SidebarInset className="flex min-h-screen max-w-full flex-col">
               <header className="bg-background sticky-top z-10 border-b px-4 py-2">
                 <div className="flex shrink-0 grow items-center gap-2">
                   <SidebarTrigger className="ml-1"/>
@@ -22,7 +22,7 @@ export default function Layout({ children }: { children: React.ReactNode}) {
                   </Breadcrumb>
                 </div>
               </header>
-              <main className="flex-1 overflow-y-auto">
+              <main className="flex-1">
                 { children }
               </main>
             </SidebarInset>

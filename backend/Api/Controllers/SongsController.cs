@@ -110,5 +110,32 @@ namespace Api.Controllers
 
             return Ok(new { message = "Published" });
         }
+
+        [HttpPatch]
+        [Route("rename")]
+        [Authorize]
+        public IActionResult RenameSong([FromBody] RenameSongRequestDto request)
+        {
+            var song = _songRepository.GetById(Guid.Parse(request.songId));
+            if (song is null) return NotFound(new { message = "Song does not exist" });
+
+            song.Title = request.newName;
+            _songRepository.SaveChanges();
+
+            return Ok(new { song });
+        }
+
+        [HttpDelete]
+        [Route("delete")]
+        [Authorize]
+        public IActionResult DeleteSong([FromBody] SongIdRequestDto request)
+        {
+            var song = _songRepository.GetById(Guid.Parse(request.songId));
+            if (song is null) return NotFound(new { message = "Song does not exist" });
+
+            _songRepository.Delete(song);
+
+            return Ok(new { song });
+        }
     }
 }
