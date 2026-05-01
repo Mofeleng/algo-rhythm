@@ -3,11 +3,12 @@
 import { useSession } from "@/modules/auth/providers/auth-provider"
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { fetchTrackList } from "../../actions/fetch-track-list";
 import { useSongUpdates } from "../../hooks/use-song-updates";
 import { SongList } from "../components/song-list";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PageLoading } from "@/components/page-loading";
+import { getApiRequest } from "@/lib/api-request";
+import { Song } from "../../dtos/song-dto";
 
 export default function SongListView () {
     const router = useRouter();
@@ -23,7 +24,7 @@ export default function SongListView () {
 
     const { data:songs, isPending, error } = useQuery({
         queryKey: ["get-songs"],
-        queryFn: fetchTrackList,
+        queryFn: () => getApiRequest<Song[]>(`${process.env.NEXT_PUBLIC_BACKEND_API}/api/songs/get-many`),
     });
 
     useEffect(() => {

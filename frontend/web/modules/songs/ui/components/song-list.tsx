@@ -8,12 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { usePublishSong } from "../../hooks/use-publish-song";
-import { generatePlayUrl } from "../../actions/generate-play-url";
 import { useQueryClient } from "@tanstack/react-query";
 import { DeleteSongAlert } from "./delete-song-alert";
 import { RenameSongModal } from "./rename-song-modal";
 import { usePlayerStore } from "../../stores/use-player-store";
 import { useSession } from "@/modules/auth/providers/auth-provider";
+import { useGeneratePlayUrl } from "../../hooks/use-play-url";
 
 export function SongList({ songs }: { songs: Song[] } ) {
     const [ searchQuery, setSearchQuery ] = useState<string>("");
@@ -28,22 +28,28 @@ export function SongList({ songs }: { songs: Song[] } ) {
 
     const { setSong } = usePlayerStore();
     const { user } = useSession();
-    const { mutate:handleSetPublishSong } = usePublishSong();
 
+    const { mutate:handleSetPublishSong } = usePublishSong();
+    const { mutate:handleGeneratePlayUrl, isPending:generatingPlayUrl } = useGeneratePlayUrl();
     const queryClient = useQueryClient();
 
     const handleSelectSong = async (song: Song) => {
-        setIsLoadingSongId(song.id)
-        const playUrl = await generatePlayUrl(song.id);
-        if (!playUrl.songUrl) return;
+        setIsLoadingSongId(song.id);
 
-        setSong({
-            id: song.id,
-            title: song.title,
-            playUrl: playUrl.songUrl,
-            createdByUserName: user?.name ?? "",
-            thumbnailUrl: song.thumbnailUrl ?? ""
-        });
+        handleGeneratePlayUrl(song.id, {
+            onSuccess: (data) => {
+                setSong({
+                    id: song.id,
+                    title: song.title,
+                    playUrl: data.songUrl,
+                    createdByUserName: user?.name ?? "",
+                    thumbnailUrl: song.thumbnailUrl ?? ""
+                });
+            }, onError: (err) => {
+                toast.error(err.message);
+            }
+        })
+        
     }
 
     const filteredSongs = songs.filter((song) => 
@@ -199,7 +205,7 @@ export function SongList({ songs }: { songs: Song[] } ) {
                                                     onClick={() => (handleSetPublishSong(song.id))}
                                                     variant="outline"
                                                     className={cn(
-                                                        "cursor-pointer",
+                                                        "cursor-pointer z-10",
                                                         song.published && "border-red-200"
                                                     )}>   
                                                         {song.published ? "Unpublish" : "Publish"}
@@ -222,14 +228,12 @@ export function SongList({ songs }: { songs: Song[] } ) {
                                                              className="mr-1"
                                                              onClick={async (e) => {
                                                                 e.stopPropagation();
-                                                                console.log(song.id)
-                                                                const playUrl = await generatePlayUrl(song.id);
-
-                                                                if (playUrl && playUrl.songUrl) {
-                                                                    toast("at: " + playUrl.songUrl)
-                                                                    window.open(playUrl.songUrl, "_blank");
-                                                                }
-                                                                return;
+                                                                if (!song.r2Key) return;
+                                                                handleGeneratePlayUrl(song.id, {
+                                                                    onSuccess: (data) => {
+                                                                        window.open(data.songUrl, "_blank")
+                                                                    }
+                                                                });
                                                              }} 
                                                             >
                                                                 <DownloadIcon />

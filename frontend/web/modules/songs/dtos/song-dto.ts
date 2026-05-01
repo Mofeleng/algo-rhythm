@@ -8,6 +8,7 @@ export interface BaseSong {
   user?: User | null;
   title: string;
   s3Key: string | null;
+  r2Key: string | null;
   thumbnailS3Key: string | null;
   status: string;
   instrumental: boolean;
