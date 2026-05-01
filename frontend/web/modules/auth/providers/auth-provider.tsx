@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { User } from "../dtos/user-dto";
 
 
@@ -16,7 +16,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
     const [status, setStatus] = useState<'loading' | 'unauthenticated' | 'authenticated'>('loading');
 
-    const fetchUser = async () => {
+    const fetchUser = useCallback(async () => {
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API}/api/auth/me`, {
                 credentials: "include"
@@ -33,9 +33,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setStatus('unauthenticated');
             console.log(error);
         }
-    };
+    }, []);
 
-    useEffect(() => { fetchUser(); }, []);
+    useEffect(() => { fetchUser(); }, [fetchUser]);
 
     const logout = async () => {
         await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API}/api/auth/logout`, {

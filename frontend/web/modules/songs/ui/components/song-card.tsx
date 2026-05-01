@@ -5,8 +5,8 @@ import { BaseSong } from "../../dtos/song-dto"
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { usePlayerStore } from "../../stores/use-player-store";
-import { generatePlayUrl } from "../../actions/generate-play-url";
 import { PlayerSong } from "../../dtos/player-store-dto";
+import { useGeneratePlayUrl } from "../../hooks/use-play-url";
 
 interface SongCardProps {
     song: BaseSong;
@@ -14,26 +14,26 @@ interface SongCardProps {
 
 export function SongCard({ song }:SongCardProps) {
     const { setSong } = usePlayerStore();
+    const { mutate:generatePlayUrl, isPending:generatingPlayUrl } = useGeneratePlayUrl();
 
-    const [ isLoading, setIsLoading ] = useState<boolean>(false);
     const [ liked, setLiked ] = useState<boolean>(false);
     //get existing like? from db and update liked
     const handleSelectSong = async () => {
-        setIsLoading(true);
+        if (!song.user || !song.s3Key) return;
 
-    const playUrl = await generatePlayUrl(song.id);
-    if (!playUrl.songUrl || !song.user) return;
+        generatePlayUrl(song.s3Key, {
+            onSuccess: (data) => {
+                const request:PlayerSong = {
+                    id: song.id,
+                    createdByUserName: song.user!.name,
+                    title: song.title,
+                    thumbnailUrl: song.thumbnailUrl ?? "",
+                    playUrl: data.songUrl
+                }
 
-    const request:PlayerSong = {
-        id: song.id,
-        createdByUserName: song.user.name,
-        title: song.title,
-        thumbnailUrl: song.thumbnailUrl ?? "",
-        playUrl: playUrl.songUrl
-    }
-
-    setSong(request);
-        setIsLoading(false);
+                setSong(request);
+            }
+        });
     }
     return (
         <div>
@@ -50,7 +50,7 @@ export function SongCard({ song }:SongCardProps) {
                     }
                     <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
                         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/50 transition-transform group-hover:scale-105">
-                            { isLoading ? <LoaderIcon className="animate-spin text-white w-6 h-6" /> : <PlayIcon className="w-6 h-6 fill-white text-white" />}
+                            { generatingPlayUrl ? <LoaderIcon className="animate-spin text-white w-6 h-6" /> : <PlayIcon className="w-6 h-6 fill-white text-white" />}
                         </div>
                     </div>
                 </div>

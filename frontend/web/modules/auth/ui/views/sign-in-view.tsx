@@ -11,10 +11,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession } from "../../providers/auth-provider";
 import { useEffect } from "react";
+import { useSignIn } from "../../hooks/use-sign-in";
+import { toast } from "sonner";
 
 export const SignInView = () => {
     const router = useRouter();
     const { status } = useSession();
+    const {mutate:handleSignIn, isPending } = useSignIn();
 
     const form = useForm({
         resolver: zodResolver(signInDto),
@@ -25,16 +28,16 @@ export const SignInView = () => {
     });
 
     const onSubmit = async (values: SignInDtoType) => {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API}/api/auth/login`, {
-            method: "POST",
-            credentials: "include", //Retrieve and store login credentials
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(values)
-        });
-
-        router.push("/")
+        handleSignIn(values, {
+            onSuccess: () => {
+                toast("Successfully signed in");
+                router.push("/")
+            }, onError: (err) => {
+                form.setError("email", err);
+                form.setError("password", err);
+                toast.error(err.message)
+            }
+        })
     }
 
     useEffect(() => {
@@ -92,7 +95,7 @@ export const SignInView = () => {
                         />
                     </FieldGroup>
                     <Field orientation="horizontal" className="w-full flex flex-row justify-end">
-                        <Button type="submit">
+                        <Button type="submit" disabled={isPending}>
                             Sign in
                         </Button>
                     </Field>

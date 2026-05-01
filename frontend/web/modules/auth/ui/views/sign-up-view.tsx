@@ -11,10 +11,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useSession } from '../../providers/auth-provider';
+import { useSignUp } from '../../hooks/use-sign-up';
+import { toast } from 'sonner';
 
 const SignUpView = () => {
     const router = useRouter();
     const { status } = useSession();
+    const { mutate:handleSignUp, isPending } = useSignUp();
+
     const form = useForm({
         resolver: zodResolver(signUpDto),
         defaultValues: {
@@ -26,15 +30,15 @@ const SignUpView = () => {
     });
 
     const onSubmit = async ({ name, email, password }:SignUpDtoType) => {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API}/api/auth/register`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ name, email, password })
-        });
-
-        router.push("/auth/sign-in");
+        handleSignUp({ name, email, password }, {
+             onSuccess: () => {
+                toast("Successfully signed in");
+                router.push("/")
+            }, onError: (err) => {
+                form.setError("root", err);
+                toast.error(err.message);
+            }
+        })
     }
 
     useEffect(() => {
@@ -51,6 +55,7 @@ const SignUpView = () => {
         </CardHeader>
         <CardContent>
             <form id='register-form' className='space-y-5' onSubmit={form.handleSubmit(onSubmit)}>
+                { form.formState.errors.root && (<p className='text-red-500 text-centered'>{ form.formState.errors.root.message }</p>)}
                 <FieldGroup>
                     <Controller
                         name='name'
@@ -132,7 +137,7 @@ const SignUpView = () => {
                 </FieldGroup>
 
                 <Field orientation="horizontal" className='w-full flex flex-row justify-end'>
-                    <Button type='submit'>
+                    <Button type='submit' disabled={isPending}>
                         Sign up
                     </Button>
                 </Field>

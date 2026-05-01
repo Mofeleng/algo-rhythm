@@ -1,14 +1,13 @@
 "use client";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
-import { generateSong } from "../actions/generate-song";
-import { GenerateRequest } from "../dtos/generate-song";
-import { toast } from "sonner";
+import { GenerateRequest, GenerateResponse } from "../dtos/generate-song";
+import { postApiRequest } from "@/lib/api-request";
 
 export function useGenerateSong() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (request:GenerateRequest) => generateSong(request),
+        mutationFn: async (request:GenerateRequest) => postApiRequest<GenerateResponse>(`${process.env.NEXT_PUBLIC_BACKEND_API}/api/jobs/generate-song`, JSON.stringify(request)),
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: [ "get-songs" ]})
         },
