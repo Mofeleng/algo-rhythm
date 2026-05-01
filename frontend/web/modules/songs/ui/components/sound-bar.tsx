@@ -92,6 +92,9 @@ export function SoundBar() {
             }
         }
     }, [song]);
+
+    if (!song) return null;
+    
     return (
         <div className="px-4 pb-2">
             <Card className="bg-background/60 relative w-full shrink-0 border-t py-0 backdrop-blur-2xl">

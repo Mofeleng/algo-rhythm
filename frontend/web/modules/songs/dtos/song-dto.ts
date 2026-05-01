@@ -2,7 +2,7 @@ import { User } from "@/modules/auth/dtos/user-dto";
 import { SongCategory } from "./song-categories-dto";
 import { SongLike } from "./song-like-dto";
 
-export interface Song {
+export interface BaseSong {
   id: string;
   userId: string;
   user?: User | null;
@@ -12,20 +12,27 @@ export interface Song {
   status: string;
   instrumental: boolean;
   prompt: string | null;
+  audioDuration: number | null;
+  published: boolean;
+  listenCount: number;
+  likes: number;
+  songUrl?: string;
+  thumbnailUrl?: string;
+  categories: string[];
+  createdAt: string; // Represented as ISO strings from the API
+  updatedAt: string;
+}
+
+
+export interface Song extends Omit<BaseSong, "likes"> {
   lyrics: string | null;
+  likes: SongLike[];
   songDescription: string | null;
   lyricsDescription: string | null;
   guidanceScale: number | null;
   inferStep: number | null;
-  audioDuration: number | null;
   seed: number | null;
-  published: boolean;
-  listenCount: number;
-  likes: SongLike[];
-  songUrl?: string;
-  thumbnailUrl?: string;
-  songCategories: SongCategory[];
-  createdAt: string; // Represented as ISO strings from the API
-  updatedAt: string;
 }
+
+
 

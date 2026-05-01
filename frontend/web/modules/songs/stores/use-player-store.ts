@@ -1,12 +1,5 @@
 import { create } from "zustand";
-
-interface PlayerSong {
-    id: string;
-    title: string;
-    playUrl: string | null;
-    thumbnailUrl: string | null;
-    createdByUserName: string | null;
-}
+import { PlayerSong } from "../dtos/player-store-dto";
 
 interface PlayerState {
     song: PlayerSong | null;
