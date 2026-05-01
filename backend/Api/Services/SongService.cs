@@ -16,14 +16,24 @@ namespace Api.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly ISongRepository _songRepository;
+        private readonly ICategoryRepository _categoryRepository;
+
         private readonly IConfiguration _configuration;
         private readonly IHttpClientFactory _clientFactory;
         private readonly IHubContext<SongHub> _hubContext;
 
-        public SongService(IUserRepository userRepository, IHttpClientFactory clientFactory, ISongRepository songRepository, IConfiguration configuration, IHubContext<SongHub> hubContext)
+        public SongService(
+            IUserRepository userRepository,
+            IHttpClientFactory clientFactory,
+            ISongRepository songRepository,
+            ICategoryRepository categoryRepository,
+            IConfiguration configuration,
+            IHubContext<SongHub> hubContext
+        )
         {
             _userRepository = userRepository;
             _songRepository = songRepository;
+            _categoryRepository = categoryRepository;
             _configuration = configuration;
             _clientFactory = clientFactory;
             _hubContext = hubContext;
@@ -139,7 +149,16 @@ namespace Api.Services
                     {
                         foreach (string s in result.categories)
                         {
-                            Console.WriteLine(s);
+                            var c = await _categoryRepository.GetByName(s);
+                            if (c == null)
+                            {
+                                c = _categoryRepository.Create(new Category { Name = s });
+                            }
+                            song.SongCategories.Add(new SongCategory
+                            {
+                                SongId = song.Id,
+                                CategoryId = c.Id
+                            });
                         }
                     }
 

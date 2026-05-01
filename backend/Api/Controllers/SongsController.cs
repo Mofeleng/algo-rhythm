@@ -16,6 +16,13 @@ namespace Api.Controllers
         private readonly IConfiguration _configuration;
         private readonly SongService _songService;
 
+        private string _accessId;
+        private string _secretKey;
+        private string _bucketName;
+
+        private AmazonS3Config _s3Config;
+        private IAmazonS3 _r2Client;
+
         public SongsController(
             ISongRepository songRepository,
             IConfiguration configuration,
@@ -25,6 +32,36 @@ namespace Api.Controllers
             _songRepository = songRepository;
             _configuration = configuration;
             _songService = songService;
+
+            _accessId = _configuration.GetValue<string>("Cloudflare:AccessKeyId")!;
+            _secretKey = _configuration.GetValue<string>("Cloudflare:SecretAccessKey")!;
+            _bucketName = _configuration.GetValue<string>("Cloudflare:BucketName")!;
+            _s3Config = new AmazonS3Config
+            {
+                ServiceURL = _configuration.GetValue<string>("Cloudflare:R2Api")
+            };
+
+            _r2Client = new AmazonS3Client(_accessId, _secretKey, _s3Config);
+        }
+
+        [HttpGet]
+        [Route("get-all")]
+        [Authorize]
+        public async Task<IActionResult> GetTopHundred()
+        {
+            var songs = await _songRepository.GetMostRecentPublished();
+            if (songs == null || !songs.Any()) return NotFound(new { message = "No published songs" });
+
+            Parallel.ForEach(songs, song =>
+            {
+                var thumbnailUrl = song.ThumbnailS3Key != null ?
+                   _songService.GeneratePresignedUrl(_r2Client, _bucketName, song.ThumbnailS3Key) :
+                   null;
+
+                song.ThumbnailUrl = thumbnailUrl;
+            });
+
+            return Ok(new { songs });
         }
 
         [HttpGet]
@@ -40,21 +77,10 @@ namespace Api.Controllers
             var songs = await _songRepository.GetByUserId(userId);
             if (songs == null || !songs.Any()) return Ok(songs);
 
-            string accessId = _configuration.GetValue<string>("Cloudflare:AccessKeyId")!;
-            string secretKey = _configuration.GetValue<string>("Cloudflare:SecretAccessKey")!;
-            string bucketName = _configuration.GetValue<string>("Cloudflare:BucketName")!;
-
-            var config = new AmazonS3Config
-            {
-                ServiceURL = _configuration.GetValue<string>("Cloudflare:R2Api")
-            };
-
-            IAmazonS3 r2Client = new AmazonS3Client(accessId, secretKey, config);
-
             Parallel.ForEach(songs, song =>
             {
                 var thumbnailUrl = song.ThumbnailS3Key != null ?
-                    _songService.GeneratePresignedUrl(r2Client, bucketName, song.ThumbnailS3Key) :
+                    _songService.GeneratePresignedUrl(_r2Client, _bucketName, song.ThumbnailS3Key) :
                     null;
 
                 song.ThumbnailUrl = thumbnailUrl;
@@ -86,7 +112,7 @@ namespace Api.Controllers
 
             IAmazonS3 r2Client = new AmazonS3Client(accessId, secretKey, config);
 
-            string presignedUrl = _songService.GeneratePresignedUrl(r2Client, bucketName, song.S3Key);
+            string presignedUrl = _songService.GeneratePresignedUrl(_r2Client, bucketName, song.S3Key);
             Console.WriteLine("Presigned: " + presignedUrl);
 
             //Consider song listened to if a presigned url is generated
