@@ -1,17 +1,16 @@
 "use client";
 
-
-import { useSession } from "@/modules/auth/providers/auth-provider";
-import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { MusicIcon } from "lucide-react";
-import { SongCard } from "../components/song-card";
 import { PageLoading } from "@/components/page-loading";
 import { getApiRequest } from "@/lib/api-request";
-import { BaseSong } from "../../dtos/song-dto";
+import { useSession } from "@/modules/auth/providers/auth-provider";
+import { BaseSong } from "@/modules/songs/dtos/song-dto";
+import { SongCard } from "@/modules/songs/ui/components/song-card";
+import { useQuery } from "@tanstack/react-query";
+import { MusicIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-export default function HomePageView() {
+export function ExplorePageView() {
     const router = useRouter();
     const { user, status } = useSession();
 
@@ -21,12 +20,6 @@ export default function HomePageView() {
         refetchOnWindowFocus: false
     });
 
-      useEffect(() => {
-        if (status === "unauthenticated") {
-            router.push("/auth/sign-in");
-        }
-    }, [status, router]);
-
     const songs = songData?.songs;
 
     if (isPending) {
@@ -35,7 +28,7 @@ export default function HomePageView() {
 
      if (!songs || error) {
         return (
-            <div className="flex h-full flex-col items-center justify-center p-4 text-center">
+            <div className="flex flex-col items-center justify-center p-4 text-center">
                 <MusicIcon className="w-20 h-20 text-muted-foreground" />
                 <h1 className="mt-4 text-2xl font-bold tracking-tight">Something went wrong</h1>
                 <p className="text-muted-foreground mt-2">
@@ -69,7 +62,7 @@ export default function HomePageView() {
    
     if (trendingSongs?.length === 0 && Object.keys(categorizedSongs).length === 0) {
         return (
-            <div className="flex h-full flex-col items-center justify-center p-4 text-center">
+            <div className="flex flex-col items-center justify-center p-4 text-center">
                 <MusicIcon className="w-20 h-20 text-muted-foreground" />
                 <h1 className="mt-4 text-2xl font-bold tracking-tight">No songs</h1>
                 <p className="text-muted-foreground mt-2">
@@ -79,14 +72,14 @@ export default function HomePageView() {
         )
     }
     return (
-        <div className="p-4">
+        <div className="py-4 px-10">
             <h1 className="text-2xl font-bold tracking-tight">
                 Discover music
             </h1>
             { trendingSongs.length > 0 && (
                 <div className="mt-6">
                     <h2 className="text-xl font-semibold">Trending</h2>
-                    <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-6  md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                    <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-6  md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
                         { trendingSongs.map((song) => (
                             <SongCard key={song.id} song={song} />
                         ))}
@@ -96,7 +89,7 @@ export default function HomePageView() {
             { otherSongs.length > 0 && (
                 <div className="mt-6">
                     <h2 className="text-xl font-semibold">Explore songs</h2>
-                    <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-6  md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+                    <div className="mt-4 grid grid-cols-2 gap-x-4 gap-y-6  md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
                         { otherSongs.map((song) => (
                             <SongCard key={song.id} song={song} />
                         ))}
@@ -106,4 +99,5 @@ export default function HomePageView() {
             }
         </div>
     )
+
 }

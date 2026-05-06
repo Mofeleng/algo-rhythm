@@ -30,13 +30,18 @@ namespace Api.Controllers
             var song = new Song
             {
                 UserId = Guid.Parse(request.UserId),
-                Prompt = request.Prompt ?? "",
-                LyricsDescription = request.LyricsDescription ?? "",
-                SongDescription = request.SongDescription ?? "",
+                Prompt = request.Prompt,
+                Lyrics = request.Lyrics,
+                LyricsDescription = request.LyricsDescription,
+                SongDescription = request.SongDescription,
                 Instrumental = request.Instrumental ?? false,
-                Status = "qeued",
+                Status = "queued",
                 Title = request.Title,
-                GuidanceScale = request.GuidanceScale
+                GuidanceScale = request.GuidanceScale,
+                InferStep = request.InferStep,
+                AudioDuration = request.AudioDuration,
+                Seed = request.Seed
+
             };
 
             var newSong = _songRepository.Create(song);

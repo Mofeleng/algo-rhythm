@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { useRenameSong } from "../../hooks/use-rename-song";
 import { Loader } from "lucide-react";
+import { toast } from "sonner";
 
 interface RenameSongModalProps {
     songId: string;
@@ -23,6 +24,9 @@ export function RenameSongModal({ songId, open, prevName, setOpen }:RenameSongMo
         handleRenameSong({ songId, newName }, {
             onSuccess: () => {
                 setOpen(false);
+            },
+            onError: (err) => {
+                toast.error("Something went wrong " + err.message)
             }
         })
     }

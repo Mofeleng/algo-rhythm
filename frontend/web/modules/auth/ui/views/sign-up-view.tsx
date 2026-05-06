@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 
 const SignUpView = () => {
     const router = useRouter();
-    const { status } = useSession();
+    const { status, refetch } = useSession();
     const { mutate:handleSignUp, isPending } = useSignUp();
 
     const form = useForm({
@@ -31,8 +31,9 @@ const SignUpView = () => {
 
     const onSubmit = async ({ name, email, password }:SignUpDtoType) => {
         handleSignUp({ name, email, password }, {
-             onSuccess: () => {
+             onSuccess: async () => {
                 toast("Successfully signed in");
+                await refetch();
                 router.push("/")
             }, onError: (err) => {
                 form.setError("root", err);

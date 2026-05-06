@@ -18,7 +18,6 @@ import numpy as np
 def safe_torchaudio_save(uri, src, sample_rate: int, **kwargs):
     """Fallback that uses soundfile directly (bypasses TorchCodec)."""
     try:
-        # src is usually a torch.Tensor of shape (channels, samples) or (samples,)
         waveform = src.cpu().numpy()
 
         # Ensure 2D shape: (samples, channels)
@@ -30,9 +29,7 @@ def safe_torchaudio_save(uri, src, sample_rate: int, **kwargs):
             waveform = waveform.T
 
         sf.write(uri, waveform, samplerate=sample_rate, subtype='PCM_16')
-        print(f"✓ Saved audio using soundfile: {uri} | duration ≈ {len(waveform)/sample_rate:.1f}s")
     except Exception as e:
-        print(f"❌ Error in safe_torchaudio_save: {e}")
         raise
     
 app = modal.App("algo-rhythm")

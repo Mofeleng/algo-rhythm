@@ -16,7 +16,7 @@ import { toast } from "sonner";
 
 export const SignInView = () => {
     const router = useRouter();
-    const { status } = useSession();
+    const { status, refetch } = useSession();
     const {mutate:handleSignIn, isPending } = useSignIn();
 
     const form = useForm({
@@ -29,9 +29,10 @@ export const SignInView = () => {
 
     const onSubmit = async (values: SignInDtoType) => {
         handleSignIn(values, {
-            onSuccess: () => {
+            onSuccess: async () => {
                 toast("Successfully signed in");
-                router.push("/")
+                await refetch();
+                router.push("/manage")
             }, onError: (err) => {
                 form.setError("email", err);
                 form.setError("password", err);

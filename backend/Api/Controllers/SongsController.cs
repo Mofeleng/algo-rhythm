@@ -46,7 +46,6 @@ namespace Api.Controllers
 
         [HttpGet]
         [Route("get-all")]
-        [Authorize]
         public async Task<IActionResult> GetTopHundred()
         {
             var songs = await _songRepository.GetMostRecentPublished();
@@ -66,7 +65,6 @@ namespace Api.Controllers
 
         [HttpGet]
         [Route("get-many")]
-        [Authorize]
         public async Task<IActionResult> GetMany()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -101,18 +99,8 @@ namespace Api.Controllers
             {
                 return BadRequest(new { message = "Cannot generate play url for non existant song" });
             }
-            string accessId = _configuration.GetValue<string>("Cloudflare:AccessKeyId")!;
-            string secretKey = _configuration.GetValue<string>("Cloudflare:SecretAccessKey")!;
-            string bucketName = _configuration.GetValue<string>("Cloudflare:BucketName")!;
 
-            var config = new AmazonS3Config
-            {
-                ServiceURL = _configuration.GetValue<string>("Cloudflare:R2Api")
-            };
-
-            IAmazonS3 r2Client = new AmazonS3Client(accessId, secretKey, config);
-
-            string presignedUrl = _songService.GeneratePresignedUrl(_r2Client, bucketName, song.S3Key);
+            string presignedUrl = _songService.GeneratePresignedUrl(_r2Client, _bucketName, song.S3Key);
             Console.WriteLine("Presigned: " + presignedUrl);
 
             //Consider song listened to if a presigned url is generated

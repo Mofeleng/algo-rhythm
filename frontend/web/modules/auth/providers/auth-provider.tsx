@@ -3,11 +3,11 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { User } from "../dtos/user-dto";
 
-
 interface AuthContextType {
     user: User | null;
     status: 'loading' | 'authenticated' | 'unauthenticated';
-    logout: () => void;
+    logout: () => Promise<void>;
+    refetch: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -17,9 +17,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [status, setStatus] = useState<'loading' | 'unauthenticated' | 'authenticated'>('loading');
 
     const fetchUser = useCallback(async () => {
+        setStatus('loading');
         try {
             const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API}/api/auth/me`, {
-                credentials: "include"
+                credentials: "include",
             });
 
             if (res.ok) {
@@ -27,34 +28,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 setUser(data.user);
                 setStatus('authenticated');
             } else {
+                setUser(null);
                 setStatus('unauthenticated');
             }
-        } catch (error) {
+        } catch {
+            setUser(null);
             setStatus('unauthenticated');
-            console.log(error);
         }
     }, []);
 
     useEffect(() => { fetchUser(); }, [fetchUser]);
 
-    const logout = async () => {
-        await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API}/api/auth/logout`, {
-            method: "POST",
-            credentials: "include"
-        });
-        setUser(null);
-        setStatus('unauthenticated');
-    }
+    const logout = useCallback(async () => {
+        try {
+            await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API}/api/auth/logout`, {
+                method: "POST",
+                credentials: "include",
+            });
+        } finally {
+            setUser(null);
+            setStatus('unauthenticated');
+        }
+    }, []);
 
     return (
-        <AuthContext.Provider value={{ user, status, logout }}>
-            { children }
+        <AuthContext.Provider value={{ user, status, logout, refetch: fetchUser }}>
+            {children}
         </AuthContext.Provider>
-    )
-};
+    );
+}
 
 export const useSession = () => {
     const ctx = useContext(AuthContext);
     if (!ctx) throw new Error("useSession must be used within AuthProvider");
     return ctx;
-}
+};

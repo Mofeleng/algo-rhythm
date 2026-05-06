@@ -1,27 +1,30 @@
-import { Clock, Download, DownloadIcon, Loader, MoreHorizontal, Music, PencilIcon, Play, RefreshCcw, Search, Trash, XCircle } from "lucide-react";
-import { Song } from "../../dtos/song-dto";
-import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { usePublishSong } from "../../hooks/use-publish-song";
-import { useQueryClient } from "@tanstack/react-query";
-import { DeleteSongAlert } from "./delete-song-alert";
-import { RenameSongModal } from "./rename-song-modal";
 import { usePlayerStore } from "../../stores/use-player-store";
 import { useSession } from "@/modules/auth/providers/auth-provider";
+import { usePublishSong } from "../../hooks/use-publish-song";
 import { useGeneratePlayUrl } from "../../hooks/use-play-url";
+import { useQueryClient } from "@tanstack/react-query";
+import { Song } from "../../dtos/song-dto";
+import { toast } from "sonner";
+import { DeleteSongAlert } from "../components/delete-song-alert";
+import { RenameSongModal } from "../components/rename-song-modal";
+import { ClockIcon, DownloadIcon, LoaderIcon, MoreHorizontal, MusicIcon, PencilIcon, PlayIcon, PlusIcon, RefreshCcwIcon, SearchIcon, TrashIcon, XCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { SoundBar } from "../components/sound-bar";
+import { NewSongModal } from "../components/new-song-modal";
 
-export function SongList({ songs }: { songs: Song[] } ) {
+export function ManageSongsView({ songs }: { songs: Song[] }) {
     const [ searchQuery, setSearchQuery ] = useState<string>("");
     const [ isRefreshing, setIsRefreshing ] = useState<boolean>(false);
     const [ isLoadingSongId, setIsLoadingSongId ] = useState<string|null>(null);
 
     const [ isDeleteOpen, setIsDeleteOpen ] = useState<boolean>(false);
     const [ isRenameOpen, setIsRenameOpen ] = useState<boolean>(false);
+    const [ isCreateOpen, setIsCreateOpen ] = useState<boolean>(false);
 
     const [ selectedId, setSelectedId ] = useState<string|undefined>();
     const [prevName, setPrevName ] = useState<string|undefined>();
@@ -76,7 +79,7 @@ export function SongList({ songs }: { songs: Song[] } ) {
     }
 
     return (
-        <>
+        <div className="px-4">
         {selectedId && (
             <>
             <DeleteSongAlert
@@ -93,29 +96,54 @@ export function SongList({ songs }: { songs: Song[] } ) {
             />
             </>
         )}
-        <div className="flex flex-1 flex-col overflow-y-auto">
-            <div className="flex-1 p-6">
+        {
+            user && (
+                <NewSongModal
+                open={isCreateOpen}
+                setOpen={setIsCreateOpen}
+                userId={user.id}
+            />
+            )
+        }
+        <div className="max-w-3xl mx-auto">
+            <div className="p-6">
                 <div className="mb-4 flex items-center justify-between gap-4">
                     <div className="relative max-w-md flex-1">
-                        <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-1/2" />
+                        <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-1/2" />
                         <Input
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             placeholder="Search" className="pl-10"
                         />
                     </div>
-                    <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={isRefreshing}
-                        onClick={handleRefresh}
-                    >
-                        <RefreshCcw className={cn("mr-2", isRefreshing && "animate-spin")} />
-                        Refresh
-                    </Button>
+                    <div className="flex flex-row gap-2">
+                        <Button
+                            size="sm"
+                            onClick={() => setIsCreateOpen(true)}
+                            className="cursor-pointer"
+                        >
+                            <PlusIcon className="mr-2"/>
+                            Add new song
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="outline"
+                            disabled={isRefreshing}
+                            onClick={handleRefresh}
+                            className="cursor-pointer"
+                        >
+                            <RefreshCcwIcon className={cn("mr-2", isRefreshing && "animate-spin")} />
+                            Refresh
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="space-y-1">
+                    { filteredSongs.length === 0 && (
+                        <div className="mt-3 w-full border-muted text-center">
+                            <p className="text-muted">No songs yet, Your song generation history will show here</p>
+                        </div>
+                    )}
                     { filteredSongs.map((song) => {
                         switch (song.status) {
                             case "failed":
@@ -152,7 +180,7 @@ export function SongList({ songs }: { songs: Song[] } ) {
                                     <div key={song.id} className="flex cursor-wait items-center gap-4 rounded-lg p-3 border border-dashed border-muted-foreground/20 bg-muted/10">
                                         <div className="bg-muted/50 flex h-12 w-12 shrink-0 items-center justify-center rounded-md border">
                                             {/* Using a clock to indicate "waiting" instead of a spinner */}
-                                            <Clock className="text-muted-foreground/60 h-6 w-6 animate-pulse" />
+                                            <ClockIcon className="text-muted-foreground/60 h-6 w-6 animate-pulse" />
                                         </div>
                                         <div className="min-w-0 flex-1">
                                             <div className="flex items-center gap-2">
@@ -171,7 +199,7 @@ export function SongList({ songs }: { songs: Song[] } ) {
                                 return (
                                     <div key={song.id} className="flex cursor-not-allowed items-center gap-4 rounded-lg p-3">
                                         <div className="bg-muted/30 flex h-12 w-12 shrink-0 items-center justify-center rounded-md">
-                                            <Loader className="text-muted-foreground animate-spin h-6 w-6" />
+                                            <LoaderIcon className="text-muted-foreground animate-spin h-6 w-6" />
                                         </div>
                                         <div className="min-w-0 flex-1">
                                             <h3 className="text-muted-foreground truncate text-sm font-medium">Processing</h3>
@@ -198,11 +226,11 @@ export function SongList({ songs }: { songs: Song[] } ) {
                                                         className="h-full w-full object-cover"
                                                     /> :
                                                     <div className="bg-muted flex h-full w-full items-center justify-center">
-                                                        <Music className="text-muted-foreground h-6 w-6"/>
+                                                        <MusicIcon className="text-muted-foreground h-6 w-6"/>
                                                     </div>
                                             }
                                             <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity group-hover:opacity-100">
-                                                { isLoadingSongId === song.id ? <Loader className="animate-spin text-white" /> : <Play className="text-primary fill-primary" />}
+                                                { isLoadingSongId === song.id ? <LoaderIcon className="animate-spin text-white" /> : <PlayIcon className="text-primary fill-primary" />}
                                             </div>
                                         </div>
                                         <div className="min-w-0 flex-1 ">
@@ -275,7 +303,7 @@ export function SongList({ songs }: { songs: Song[] } ) {
                                                                     handleToggleDelete(song.id)
                                                                 }} 
                                                             >
-                                                                <Trash />
+                                                                <TrashIcon />
                                                                 Delete
                                                             </DropdownMenuItem>
                                                         </DropdownMenuContent>
@@ -293,6 +321,6 @@ export function SongList({ songs }: { songs: Song[] } ) {
                 </div>
             </div>
         </div>
-    </>
+    </div>
     )
 }

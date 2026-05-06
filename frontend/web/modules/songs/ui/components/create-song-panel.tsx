@@ -1,19 +1,20 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Loader2, Plus, Music, Loader, Settings2 } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { useGenerateSong } from "../../hooks/use-generate-song";
 import { useSession } from "@/modules/auth/providers/auth-provider";
 import { useRouter } from "next/navigation";
-import { PageLoading } from "@/components/page-loading";
-import { useGenerateSong } from "../../hooks/use-generate-song";
+import { toast } from "sonner";
+import { Loader2Icon, MusicIcon, PlusIcon, Settings2Icon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PageLoading } from "@/components/page-loading";
 
 const inspirationTags = [
     "Driving rock anthem",
@@ -33,7 +34,8 @@ const styleTags = [
     "Afro beats"
 ]
 
-export function SongPanel() {
+
+export function CreateSongPanel() {
     const router = useRouter();
     const { status, user } = useSession();
     const { mutateAsync:generateSong, isPending:generating } = useGenerateSong();
@@ -125,10 +127,11 @@ export function SongPanel() {
 
 
     return (
-    <div className="bg-muted/30 flex flex-col h-full border-r">
-        {     status === "loading" ? <PageLoading /> : (
+        <div className="bg-muted/30 h-full flex flex-col">
+                <div className="flex flex-col">
+                     {     status === "loading" ? <PageLoading /> : (
             <>
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className=" p-4">
                 <Tabs value={mode} onValueChange={(value) => setMode(value as "simple" | "custom")}>
                     <TabsList className="w-full">
                         <TabsTrigger value="simple">Simple</TabsTrigger>
@@ -145,7 +148,7 @@ export function SongPanel() {
                             />
                         </div>
                         <div className="flex items-center justify-between">
-                            <Button variant="outline" size="sm" onClick={() => setMode("custom")}><Plus className="mr-1" />Lyrics</Button>
+                            <Button variant="outline" size="sm" onClick={() => setMode("custom")}><PlusIcon className="mr-1" />Lyrics</Button>
                             <div className="flex items-center gap-2">
                                 <label className="text-sm font-medium">Instrimental</label>
                                 <Switch checked={instrumental} onCheckedChange={(c) => setInstrumental(c)}/>
@@ -163,7 +166,7 @@ export function SongPanel() {
                                             className="h-7 shrink-0 bg-transparent text-xs"
                                             onClick={() => handlePopulateInspiration(i)}
                                         >
-                                            <Plus className="mr-1"/> { i}
+                                            <PlusIcon className="mr-1"/> { i}
                                         </Button>
                                     ))}
                                 </div>
@@ -227,7 +230,7 @@ export function SongPanel() {
                                             className="h-7 shrink-0 bg-secondary/80 flex cursor-pointer text-xs"
                                             onClick={() => handlePopulateStyleTags(i)}
                                         >
-                                            <Plus className="mr-1"/> { i}
+                                            <PlusIcon className="mr-1"/> { i}
                                         </Badge>
                                     ))}
                                 </div>
@@ -237,7 +240,7 @@ export function SongPanel() {
                 </Tabs>
                  <div className="space-y-4 border-t pt-4 mt-4">
                 <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground mb-2">
-                    <Settings2 size={16} /> Generation Settings
+                    <Settings2Icon size={16} /> Generation Settings
                 </div>
                 
                 <div className="space-y-3">
@@ -278,7 +281,7 @@ export function SongPanel() {
 
            
 
-            <div className="border-t p-4 bg-background shrink-0">
+            <div className="border-t p-4 bg-muted/30 shrink-0">
                 <Button
                     disabled={generating}
                     onClick={handleCreate}
@@ -286,17 +289,18 @@ export function SongPanel() {
                 >
                     { generating ? (
                         <>
-                            <Loader2 className="animate-spin"/> Generating
+                            <Loader2Icon className="animate-spin"/> Generating
                         </>
                     ): (
                         <>
-                            <Music /> Generate
+                            <MusicIcon /> Generate
                         </>
                     )}
                 </Button>
             </div>
         </>
         )}
-    </div>
+                </div>
+        </div>
     )
 }

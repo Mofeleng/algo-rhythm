@@ -59,9 +59,9 @@ namespace Api.Services
                     {
                         song_description = song.SongDescription,
                         guidance_scale = song.GuidanceScale ?? 15.0f,
-                        infer_step = (int)(song.InferStep ?? 60.0f),
-                        audio_duration = song.AudioDuration ?? 100.0f,
-                        seed = song.Seed,
+                        infer_step = song.InferStep ?? 60,
+                        audio_duration = song.AudioDuration ?? 30.0f,
+                        seed = song.Seed ?? new Random().Next(1, 1000000),
                         instrumental = song.Instrumental
                     };
                 } else if (song.Lyrics != null && song.Prompt != null)
@@ -72,9 +72,9 @@ namespace Api.Services
                         lyrics = song.Lyrics,
                         prompt = song.Prompt,
                         guidance_scale = song.GuidanceScale ?? 15.0f,
-                        infer_step = (int)(song.InferStep ?? 60.0f),
-                        audio_duration = song.AudioDuration ?? 100.0f,
-                        seed = song.Seed,
+                        infer_step = song.InferStep ?? 60,
+                        audio_duration = song.AudioDuration ?? 30.0f,
+                        seed = song.Seed ?? new Random().Next(1, 1000000),
                         instrumental = song.Instrumental
                     };
                 } else if (song.LyricsDescription != null && song.Prompt != null)
@@ -86,9 +86,9 @@ namespace Api.Services
                         lyrics = "",
                         prompt = song.Prompt,
                         guidance_scale = song.GuidanceScale ?? 15.0f,
-                        infer_step = (int)(song.InferStep ?? 60.0f),
-                        audio_duration = song.AudioDuration ?? 100.0f,
-                        seed = song.Seed,
+                        infer_step = song.InferStep ?? 60,
+                        audio_duration = song.AudioDuration ?? 30.0f,
+                        seed = song.Seed ?? new Random().Next(1, 1000000),
                         instrumental = song.Instrumental
                     };
                 }
@@ -171,7 +171,7 @@ namespace Api.Services
                     return result;
                 } 
                 var errorJson = await response.Content.ReadAsStringAsync();
-                Console.WriteLine($"MODAL ERROR: {errorJson}"); // THIS WILL TELL YOU THE EXACT FIELD
+                Console.WriteLine($"MODAL ERROR: {errorJson}");
 
                 song.Status = "failed";
                 _songRepository.SaveChanges();
