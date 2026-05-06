@@ -9,6 +9,9 @@
         public string? LyricsDescription { get; set; }
         public bool? Instrumental { get; set; }
         public float? GuidanceScale { get; set; }
+        public float? AudioDuration { get; set; }
+        public int? Seed { get; set; }
+        public int? InferStep { get; set; }
         public required string UserId { get; set; }
 
     }

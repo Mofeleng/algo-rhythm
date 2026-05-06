@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Music, Search } from "lucide-react";
+import { Compass, Home, Music, Search } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { SidebarMenuButton, SidebarMenuItem } from "../../../../components/ui/sidebar";
 
@@ -10,9 +10,9 @@ export default function SidebarMenuItems() {
     
     let sidebarItems = [
         {
-            title: "Dashboard",
-            url: "/dashboard",
-            icon: Home,
+            title: "Explore",
+            url: "/dashboard/explore",
+            icon: Compass,
             active: false
         },
         {

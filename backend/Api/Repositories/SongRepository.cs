@@ -69,10 +69,12 @@ namespace Api.Repositories
                         Name = s.User.Name,
                         Email = s.User.Email
                     },
-                    Categories = s.SongCategories.Where(s => s.Category != null).Select(c => c.Category!.Name).ToList() ?? new List<string>(),
+                    Categories = s.SongCategories.Select(c => c.Category.Name).ToList() ?? new List<string>(),
                     Likes = s.Likes.Select(l => l.UserId).Count()
                 })
                 .ToListAsync();
+
+
 
             return songs;
         }

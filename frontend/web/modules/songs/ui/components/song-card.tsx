@@ -21,7 +21,7 @@ export function SongCard({ song }:SongCardProps) {
     const handleSelectSong = async () => {
         if (!song.user || !song.s3Key) return;
 
-        generatePlayUrl(song.s3Key, {
+        generatePlayUrl(song.id, {
             onSuccess: (data) => {
                 const request:PlayerSong = {
                     id: song.id,
@@ -54,9 +54,9 @@ export function SongCard({ song }:SongCardProps) {
                         </div>
                     </div>
                 </div>
-                <h3 className="mt-2 truncate text-sm font-medium text-gray-900">{ song.title }</h3>
-                <p className="text-xs text-gray-500">{ song.user?.name }</p>
-                <div className="mt-1 items-center justify-between text-xs text-gray-900">
+                <h3 className="mt-2 truncate text-sm font-medium">{ song.title }</h3>
+                <p className="text-xs text-muted-foreground">{ song.user?.name }</p>
+                <div className="mt-1 items-center justify-between text-xs">
                     <span>{song.listenCount } listens</span>
                     <button className="flex cursor-pointer items-center gap-1">
                         <HeartIcon className={
