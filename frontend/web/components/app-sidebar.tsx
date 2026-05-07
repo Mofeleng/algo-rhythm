@@ -1,6 +1,6 @@
 "use client";
 
-import { Compass, Music, Settings } from "lucide-react";
+import { Music } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -11,18 +11,15 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { UserButton } from "./user-button";
 
 const items = [
-  {
-    title: "Explore",
-    url: "/explore",
-    icon: Compass,
-  },
   {
     title: "Manage Songs",
     url: "/manage",
@@ -37,7 +34,15 @@ export function AppSidebar() {
   return (
     <Sidebar variant="inset">
       <SidebarHeader className="h-16 justify-center px-4 border-b">
-        <Image src="/logo.svg" alt="Logo" width={100} height={40} className="w-24" />
+        <Link href="/explore">
+          <Image
+            src="/logo.svg" alt="Logo"
+            width={100}
+            height={40}
+            className="w-24"
+            loading="eager"
+          />
+        </Link>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -66,6 +71,9 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <UserButton />
+      </SidebarFooter>
     </Sidebar>
   );
 }

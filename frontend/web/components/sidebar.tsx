@@ -1,11 +1,13 @@
 "use client";
 
 import { cn } from "@/lib/utils"
-import { ArrowUpRightIcon, CompassIcon, MusicIcon } from "lucide-react"
+import { ArrowUpRightIcon, CompassIcon, Loader2Icon } from "lucide-react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { Button } from "./ui/button"
 import Image from "next/image"
+import { useSession } from "@/modules/auth/providers/auth-provider";
+import { UserButton } from "./user-button";
 
 const sideBarItems = [
     {
@@ -22,17 +24,22 @@ const sideBarItems = [
 
 export function AppSidebar() {
     const pathname = usePathname();
+    const router = useRouter();
 
+    const { status } = useSession();
     return (
         <div className="w-full h-dvh flex items-center justify-center relative">
             <div className="w-60 h-[calc(100vh-100px)] fixed top-10 bg-card border rounded-lg px-3 py-4 flex flex-col gap-4">
-                <Image
-                    src="/logo.svg"
-                    alt="AlgoRhythm logo"
-                    className="w-[80%] h-10"
-                    width={580}
-                    height={580}
-                />
+                <Link href="/explore">
+                    <Image
+                        src="/logo.svg"
+                        alt="AlgoRhythm logo"
+                        className="w-[80%] h-10"
+                        width={580}
+                        height={580}
+                        loading="eager"
+                    />
+                </Link>
                 <div className="mt-1 flex flex-col gap-y-1">
                     {
                         sideBarItems.map((item) => (
@@ -49,12 +56,24 @@ export function AppSidebar() {
                         ))
                     }
                 </div>
-                <div className="self-end w-full">
-                    <Button
-                        className="w-full rounded-full"
-                    >
-                        Sign up
-                    </Button>
+                <div className="mt-auto w-full">
+                    {
+                        status === "unauthenticated" ? (
+                                <Button
+                                    className="w-full rounded-full"
+                                    onClick={() => router.push("/auth/sign-in")}
+                                    
+                                >
+                                    Sign in
+                                </Button>
+                        ) : status === "loading" ? (
+                            <div className="self-center">
+                                <Loader2Icon className="animate-spin text-primary" />
+                            </div>
+                        ): (
+                            <UserButton />
+                        )
+                    }
                 </div>
             </div>
         </div>

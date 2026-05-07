@@ -34,7 +34,6 @@ const SignUpView = () => {
              onSuccess: async () => {
                 toast("Successfully signed in");
                 await refetch();
-                router.push("/")
             }, onError: (err) => {
                 form.setError("root", err);
                 toast.error(err.message);
@@ -44,7 +43,7 @@ const SignUpView = () => {
 
     useEffect(() => {
         if (status === "authenticated") {
-            router.push("/dashboard")
+            router.push("/explore")
         }
     }, [status, router])
 
