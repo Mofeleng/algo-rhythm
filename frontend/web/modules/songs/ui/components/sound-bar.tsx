@@ -1,6 +1,6 @@
 "use client";
 
-import { DownloadIcon, MoreHorizontal, MusicIcon, PauseIcon, PlayIcon, Volume2Icon, VolumeIcon } from "lucide-react";
+import { DownloadIcon, MoreHorizontal, MusicIcon, PauseIcon, PlayIcon, Volume2Icon, VolumeIcon, XIcon } from "lucide-react";
 import { usePlayerStore } from "../../stores/use-player-store";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 export function SoundBar() {
     const audioRef = useRef<HTMLAudioElement>(null);
 
-    const { song } = usePlayerStore();
+    const { song, setSong } = usePlayerStore();
 
     const [ isPlaying, setIsPlaying ] = useState<boolean>(false);
     const [ volume, setVolume ] = useState<number[]>([100]);
@@ -143,6 +143,13 @@ export function SoundBar() {
                                     className="w-16"
                                 />
                             </div>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setSong(null)}
+                            >
+                                <XIcon className="w-4 h-4" />
+                            </Button>
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button

@@ -28,9 +28,6 @@ export function UserButton() {
             <DropdownMenuContent>
               <DropdownMenuGroup>
                 <DropdownMenuLabel>Account</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => router.push("/account")} className="hover:cursor-pointer">
-                  <UserIcon /> Profile
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => logout()} className="hover:cursor-pointer">
                   <LogOutIcon /> Log out
                 </DropdownMenuItem>

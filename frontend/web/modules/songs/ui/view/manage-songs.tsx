@@ -141,7 +141,7 @@ export function ManageSongsView({ songs }: { songs: Song[] }) {
                 <div className="space-y-1">
                     { filteredSongs.length === 0 && (
                         <div className="mt-3 w-full border-muted text-center">
-                            <p className="text-muted">No songs yet, Your song generation history will show here</p>
+                            <p className="text-muted-foreground">No songs yet, Your song generation history will show here</p>
                         </div>
                     )}
                     { filteredSongs.map((song) => {

@@ -16,8 +16,6 @@ export function SongCard({ song }:SongCardProps) {
     const { setSong } = usePlayerStore();
     const { mutate:generatePlayUrl, isPending:generatingPlayUrl } = useGeneratePlayUrl();
 
-    const [ liked, setLiked ] = useState<boolean>(false);
-    //get existing like? from db and update liked
     const handleSelectSong = async () => {
         if (!song.user || !song.s3Key) return;
 
@@ -58,14 +56,7 @@ export function SongCard({ song }:SongCardProps) {
                 <p className="text-xs text-muted-foreground">{ song.user?.name }</p>
                 <div className="mt-1 items-center justify-between text-xs">
                     <span>{song.listenCount } listens</span>
-                    <button className="flex cursor-pointer items-center gap-1">
-                        <HeartIcon className={
-                            cn(
-                              "w-4 h-4",
-                               liked && "fill-red-500 text-red-500"
-                        )}/>
-                        { song.likes } likes
-                    </button>
+                  
                 </div>
             </div>
         </div>

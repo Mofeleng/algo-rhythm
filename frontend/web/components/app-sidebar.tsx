@@ -18,6 +18,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { UserButton } from "./user-button";
+import { useSession } from "@/modules/auth/providers/auth-provider";
 
 const items = [
   {
@@ -30,7 +31,7 @@ const items = [
 export function AppSidebar() {
 
   const pathname = usePathname();
-
+  const { user } = useSession();
   return (
     <Sidebar variant="inset">
       <SidebarHeader className="h-16 justify-center px-4 border-b">
@@ -71,7 +72,8 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="space-y-1">
+        <p className="text-center text-sm"><span className="font-bold">{ user?.credits }</span>&nbsp;credits</p>
         <UserButton />
       </SidebarFooter>
     </Sidebar>
