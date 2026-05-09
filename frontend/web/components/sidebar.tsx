@@ -26,7 +26,7 @@ export function AppSidebar() {
     const pathname = usePathname();
     const router = useRouter();
 
-    const { status } = useSession();
+    const { status, user } = useSession();
     return (
         <div className="w-full h-dvh flex items-center justify-center relative">
             <div className="w-60 h-[calc(100vh-100px)] fixed top-10 bg-card border rounded-lg px-3 py-4 flex flex-col gap-4">
@@ -71,7 +71,10 @@ export function AppSidebar() {
                                 <Loader2Icon className="animate-spin text-primary" />
                             </div>
                         ): (
-                            <UserButton />
+                            <div className="space-y-1">
+                                <p className="text-center text-sm"><span className="font-bold">{ user?.credits }&nbsp;</span>credits</p>
+                                <UserButton />
+                            </div>
                         )
                     }
                 </div>

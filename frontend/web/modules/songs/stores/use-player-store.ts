@@ -3,7 +3,7 @@ import { PlayerSong } from "../dtos/player-store-dto";
 
 interface PlayerState {
     song: PlayerSong | null;
-    setSong: (song: PlayerSong) => void;
+    setSong: (song: PlayerSong | null) => void;
 }
 
 export const usePlayerStore = create<PlayerState>((set) => ({
