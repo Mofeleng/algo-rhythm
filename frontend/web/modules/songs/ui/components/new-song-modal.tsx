@@ -2,7 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { useGenerateSong } from "../../hooks/use-generate-song";
@@ -56,8 +55,6 @@ const newSongSchema = z.object({
     Title: z.string(),
 });
 
-// 2. Extract the Type
-type NewSongFormValues = z.infer<typeof newSongSchema>;
 export function NewSongModal({ open, setOpen, userId }:NewSongModalProps) {
     const { mutate:generateSong, isPending:loading } = useGenerateSong();
 
@@ -92,6 +89,7 @@ export function NewSongModal({ open, setOpen, userId }:NewSongModalProps) {
 
         await generateSong({
             ...values,
+            Title: values.Title ?? `audio-${Math.random() * 10000000}`, 
             Prompt: mode === "simple" ? values.SongDescription: values.SongStyles,
             Seed: values.Seed === -1 ? Math.floor(Math.random() * 1000000) : values.Seed
         }, {
