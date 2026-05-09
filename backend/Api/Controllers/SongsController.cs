@@ -108,7 +108,6 @@ namespace Api.Controllers
             _songRepository.SaveChanges();
 
             return Ok(new { songUrl = presignedUrl });
-
         }
 
         [HttpPost]
@@ -116,8 +115,12 @@ namespace Api.Controllers
         [Authorize]
         public IActionResult SetPublishedStatus([FromBody] SongIdRequestDto request)
         {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return Unauthorized();
+          
             var song = _songRepository.GetById(Guid.Parse(request.songId));
             if (song is null) return NotFound(new { message = "Song does not exist" });
+            if (song.UserId != Guid.Parse(userIdClaim)) return BadRequest(new { message = "You cannot edit songs that were not created by you" });
 
             song.Published = !song.Published;
             _songRepository.SaveChanges();
@@ -130,8 +133,12 @@ namespace Api.Controllers
         [Authorize]
         public IActionResult RenameSong([FromBody] RenameSongRequestDto request)
         {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return Unauthorized();
+
             var song = _songRepository.GetById(Guid.Parse(request.songId));
             if (song is null) return NotFound(new { message = "Song does not exist" });
+            if (song.UserId != Guid.Parse(userIdClaim)) return BadRequest(new { message = "You cannot edit songs that were not created by you" });
 
             song.Title = request.newName;
             _songRepository.SaveChanges();
@@ -144,8 +151,13 @@ namespace Api.Controllers
         [Authorize]
         public IActionResult DeleteSong([FromBody] SongIdRequestDto request)
         {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null) return Unauthorized();
+
             var song = _songRepository.GetById(Guid.Parse(request.songId));
             if (song is null) return NotFound(new { message = "Song does not exist" });
+            
+            if (song.UserId != Guid.Parse(userIdClaim)) return BadRequest(new { message = "You cannot edit songs that were not created by you" });
 
             _songRepository.Delete(song);
 

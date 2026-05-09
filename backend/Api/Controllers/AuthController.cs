@@ -69,7 +69,7 @@ namespace Api.Controllers
 
             return Ok(new
             {
-                user = new { user.Id, user.Name, user.Email }
+                user = new { user.Id, user.Name, user.Email, user.Credits }
             });
         }
 
