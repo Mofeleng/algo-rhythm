@@ -1,4 +1,4 @@
-# Frontend — Next.js Web App
+# Frontend: Next.js Web App
 
 This folder contains the user-facing web application for Algo-Rhythm. It communicates with the ASP.NET backend via REST and receives real-time song status updates over SignalR.
 
