@@ -14,6 +14,25 @@ A full-stack web application that lets users listen to community-generated music
 
 ---
 
+## Screenshots
+
+### Explore — Discover music from the community
+![Explore page](./docs/screenshots/explore.png)
+
+### Generate a new song
+![Generate dialog](./docs/screenshots/generate-dialog.png)
+
+### Song queued — waiting to start
+![Queued state](./docs/screenshots/queued.png)
+
+### Song processing — AI generation in progress
+![Processing state](./docs/screenshots/processing.png)
+
+### Manage — Song ready to play, publish, and share
+![Manage page](./docs/screenshots/manage.png)
+
+---
+
 ## How It Works
 
 ```
