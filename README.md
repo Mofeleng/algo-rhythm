@@ -20,7 +20,7 @@ A full-stack web application that lets users listen to community-generated music
 ![Explore page](docs/screenshots/explore.png)
 
 ### Generate a new song
-![Generate dialog](docs/screenshots/generate-dialog.png)
+[![Generate dialog](docs/screenshots/generate-dialog.png)](#)
 
 ### Song queued — waiting to start
 ![Queued state](docs/screenshots/queued.png)
