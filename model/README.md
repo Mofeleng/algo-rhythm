@@ -1,4 +1,4 @@
-# Model — AI Music & Image Generation (Modal + Python 3.12)
+# Model: AI Music & Image Generation (Modal + Python 3.12)
 
 This folder contains the AI generation layer for Algo-Rhythm. It runs on [Modal](https://modal.com) and exposes a set of HTTP endpoints that the .NET backend calls to generate music and thumbnail images. All heavy GPU work happens here — the rest of the stack stays lightweight.
 
