@@ -1,5 +1,5 @@
 # Algo Rhythm
-
+test from linux
 A full-stack web application that lets users listen to community-generated music and create their own AI-generated tracks. Songs are generated asynchronously in the background — just submit a request, watch your track process in real time, and it's ready to play, share, or download when done.
 
 ---
